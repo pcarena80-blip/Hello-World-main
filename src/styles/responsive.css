@@ -1,0 +1,491 @@
+/* Responsive Design System */
+
+/* Global responsive layout */
+.responsive-layout {
+  min-height: 100vh;
+  height: 100vh; /* Full viewport height */
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: row;
+  box-sizing: border-box;
+}
+
+/* Sidebar responsiveness */
+.responsive-sidebar {
+  width: 16rem; /* 256px */
+  min-width: 16rem;
+  max-width: 20rem;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: 100vh; /* Full viewport height */
+  min-height: 100vh; /* Ensure minimum full height */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar navigation area */
+.responsive-sidebar .flex-1 {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .responsive-layout {
+    flex-direction: column;
+  }
+  
+  .responsive-sidebar {
+    width: 16rem;
+    position: fixed;
+    z-index: 50;
+  }
+  
+  .responsive-main {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .responsive-sidebar {
+    width: 16rem;
+  }
+}
+
+/* Main content area */
+.responsive-main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Dashboard main content */
+.responsive-dashboard-main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for dashboard */
+.responsive-dashboard-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.responsive-dashboard-main::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.responsive-dashboard-main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.responsive-dashboard-main::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Organization specific layouts */
+.responsive-organization {
+  min-height: 100vh;
+  height: 100vh; /* Full viewport height */
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.responsive-organization-main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100vh; /* Full viewport height */
+}
+
+.responsive-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100vh; /* Full viewport height */
+}
+
+/* Header responsiveness */
+.responsive-header {
+  width: 100%;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+/* Grid system */
+.responsive-grid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.responsive-grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.responsive-grid-3 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.responsive-grid-4 {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .responsive-grid-2,
+  .responsive-grid-3,
+  .responsive-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .responsive-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .responsive-grid-3,
+  .responsive-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .responsive-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .responsive-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .responsive-grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .responsive-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .responsive-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .responsive-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* File grid specific */
+.responsive-file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .responsive-file-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .responsive-file-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) {
+  .responsive-file-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Project grid specific */
+.responsive-project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .responsive-project-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .responsive-project-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) {
+  .responsive-project-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Modal responsiveness */
+.responsive-modal {
+  width: 100%;
+  max-width: 28rem; /* 448px */
+}
+
+@media (max-width: 640px) {
+  .responsive-modal {
+    max-width: 100%;
+  }
+}
+
+/* Utility classes for common responsive issues */
+.fix-zoom-overflow {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.fix-flex-overflow {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.fix-text-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Dialog responsiveness */
+.responsive-dialog {
+  width: 90vw;
+  max-width: 500px;
+}
+
+@media (min-width: 640px) {
+  .responsive-dialog {
+    width: 80vw;
+    max-width: 600px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-dialog {
+    width: 70vw;
+    max-width: 800px;
+  }
+}
+
+/* Table container responsiveness */
+.responsive-table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Form container responsiveness */
+.responsive-form-container {
+  width: 100%;
+  max-width: 100%;
+}
+
+.responsive-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .responsive-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Navigation responsiveness */
+.responsive-nav-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+}
+
+.responsive-nav-item {
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+/* Fix for card grid responsiveness */
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  .responsive-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fix for button responsiveness */
+.responsive-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 640px) {
+  .responsive-button-group {
+    flex-wrap: nowrap;
+    width: auto;
+  }
+}
+
+.responsive-button {
+  flex: 1;
+  min-width: fit-content;
+}
+
+@media (min-width: 640px) {
+  .responsive-button {
+    flex: none;
+  }
+}
+
+/* Dashboard content fitting */
+.dashboard-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.dashboard-header {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dashboard-widgets {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-widgets {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-widgets {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ensure no horizontal overflow */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Fix for grid layouts to prevent overflow */
+.grid {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Card responsiveness */
+.card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Ensure all cards fit within their containers */
+.dashboard-widgets .card {
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+/* Fix for specific card content */
+.card-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Chart and visualization containers */
+.chart-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Text content responsiveness */
+.text-responsive {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Print responsive rules */
+@media print {
+  .responsive-layout,
+  .responsive-main,
+  .responsive-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+  
+  .responsive-sidebar {
+    display: none !important;
+  }
+}

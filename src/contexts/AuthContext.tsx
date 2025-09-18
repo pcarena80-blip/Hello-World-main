@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface User {
-  id: number;
+export type UserRole = 'admin' | 'user';
+
+export interface User {
+  id: string;
   name: string;
   email: string;
+  role: UserRole;
+  organizationId?: string;
 }
 
 interface AuthContextType {
@@ -12,6 +16,8 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
+  isUser: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,11 +50,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('AuthContext: Found stored user:', userData);
         
         // Validate user data structure
-        if (userData && userData.id && userData.name && userData.email) {
+        if (userData && userData.id && userData.name && userData.email && userData.role) {
           // Check if the stored user is still valid by calling the backend
           const checkUserValidity = async () => {
             try {
-              const response = await fetch(`/api/user/${userData.email}`);
+              const response = await fetch(`/api/user?email=${encodeURIComponent(userData.email)}`);
               if (response.ok) {
                 setUser(userData);
                 console.log('AuthContext: Restored user from storage');
@@ -91,6 +97,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!userData || !userData.id || !userData.name || !userData.email) {
       console.error('Invalid user data provided to login:', userData);
       throw new Error('Invalid user data');
+    }
+
+    // Check if role is missing (legacy user) and provide helpful error
+    if (!userData.role) {
+      console.error('User missing role field:', userData);
+      throw new Error('Your account is missing role information. Please register a new account with your preferred role (Admin or User).');
     }
     
     setUser(userData);
@@ -159,6 +171,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isAuthenticated: !!user && !isLoading,
     isLoading,
+    isAdmin: !!user && user.role === 'admin',
+    isUser: !!user && user.role === 'user',
   };
 
   return (

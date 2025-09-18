@@ -25,6 +25,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     }, 100);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, user, isAuthenticated]); // Removed isChecking from dependencies to prevent infinite loop
 
   useEffect(() => {

@@ -1,0 +1,26 @@
+{
+  "id": "project_silver_ant_001",
+  "projectName": "Silver Ant Mobile App",
+  "description": "Develop a mobile application for Silver Ant Innovations",
+  "status": "in-progress",
+  "priority": "high",
+  "startDate": "2025-09-13T00:00:00.000Z",
+  "endDate": "2025-12-31T23:59:59.000Z",
+  "createdAt": "2025-09-13T14:00:00.000Z",
+  "updatedAt": "2025-09-13T14:00:00.000Z",
+  "createdBy": "2",
+  "assignedTo": "2",
+  "organizationId": "1757768682797",
+  "members": [
+    {
+      "userId": "2",
+      "role": "project_manager",
+      "joinedAt": "2025-09-13T14:00:00.000Z"
+    }
+  ],
+  "tags": ["mobile", "app", "development"],
+  "progress": 25,
+  "budget": 50000,
+  "client": "Silver Ant Innovations",
+  "notes": "This is the main project for Silver Ant Innovations mobile app development."
+}

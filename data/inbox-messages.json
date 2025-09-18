@@ -1,0 +1,302 @@
+[
+  {
+    "id": "activity_1758196823958",
+    "type": "project",
+    "title": "New Project Created: dsd",
+    "description": "Project \"dsd\" has been created - A fake freelance platform where devs get rewarded with “BugBucks” for writing spaghetti code and ignoring linting errors. Includes fake reviews like:\n\n\"Fixed nothing, blamed the client. 5 stars.\"",
+    "timestamp": "2025-09-18T12:00:23.958Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758196823957",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758102671881",
+    "type": "project",
+    "title": "New Project Created: one for all",
+    "description": "Project \"one for all\" has been created - Sets the visible range (zoom) to the specified range. Accepts two parameters of type Date that represent the first and last times of the wanted selected visible range. Set start to null to include everything from the earliest date to end; set end to null to include everything from start to the last date.",
+    "timestamp": "2025-09-17T09:51:11.881Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758102671880",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758099446111",
+    "type": "project",
+    "title": "New Project Created: CRM Dashboard",
+    "description": "Project \"CRM Dashboard\" has been created - Create  a crm dashboard that have properties of charts",
+    "timestamp": "2025-09-17T08:57:26.111Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758099446108",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758015865843",
+    "type": "project",
+    "title": "New Project Created: Security Audit",
+    "description": "Project \"Security Audit\" has been created - Scan for vulnerabilities and patch them.",
+    "timestamp": "2025-09-16T09:44:25.843Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "name": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758015865842",
+      "organizationId": "1757915529416",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758015540438",
+    "type": "project",
+    "title": "New Project Created: Accounting",
+    "description": "Project \"Accounting\" has been created - Prepare slides, record demo video, and present to stakeholders.",
+    "timestamp": "2025-09-16T09:39:00.438Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "name": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758015540437",
+      "organizationId": "1757915529416",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757922989519",
+    "type": "project",
+    "title": "New Project Created: csadfcsacas",
+    "description": "Project \"csadfcsacas\" has been created - cacacxsaxc",
+    "timestamp": "2025-09-15T07:56:29.519Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "name": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757922989518",
+      "organizationId": "1757918254754",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757918525598",
+    "type": "project",
+    "title": "New Project Created: CRM Dashboard",
+    "description": "Project \"CRM Dashboard\" has been created - Make CRM Dashboard using JavaScript",
+    "timestamp": "2025-09-15T06:42:05.598Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "name": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757918525597",
+      "organizationId": "1757918254754",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "inbox_1757702613863",
+    "type": "project",
+    "title": "New Project Created: KarenBot 3000",
+    "description": "Project \"KarenBot 3000\" has been created - Uses a language model to generate over-the-top complaint emails and phone scripts about fake products (e.g., \"This AI toaster tried to gaslight me.\").",
+    "timestamp": "2025-09-12T18:43:33.863Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": "2",
+      "name": "suham iqbal",
+      "email": "suham@gmail.com",
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757702613862",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "inbox_1757702458145",
+    "type": "project",
+    "title": "Project Deleted: BugBucks",
+    "description": "Project \"BugBucks\" has been deleted",
+    "timestamp": "2025-09-12T18:40:58.145Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": "current-user",
+      "name": "current-user",
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757700335051",
+      "organizationId": "1757611193123",
+      "action": "deleted"
+    },
+    "isRead": false
+  },
+  {
+    "id": "inbox_silver_ant_001",
+    "type": "welcome",
+    "title": "Welcome to Silver Ant Innovations",
+    "description": "Welcome to your new organization! Start by creating your first project or task.",
+    "timestamp": "2025-09-13T13:04:42.797Z",
+    "priority": "low",
+    "status": "unread",
+    "user": {
+      "id": "2",
+      "name": "suham iqbal",
+      "email": "suham@gmail.com",
+      "role": "super_admin"
+    },
+    "metadata": {
+      "organizationId": "1757768682797",
+      "action": "welcome"
+    },
+    "isRead": false
+  },
+  {
+    "id": "inbox_silver_ant_002",
+    "type": "project",
+    "title": "New Project Created: Silver Ant Mobile App",
+    "description": "Project \"Silver Ant Mobile App\" has been created - Develop a mobile application for Silver Ant Innovations",
+    "timestamp": "2025-09-13T14:00:00.000Z",
+    "priority": "high",
+    "status": "completed",
+    "user": {
+      "id": "2",
+      "name": "suham iqbal",
+      "email": "suham@gmail.com",
+      "role": "super_admin"
+    },
+    "metadata": {
+      "projectId": "project_silver_ant_001",
+      "organizationId": "1757768682797",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "inbox_silver_ant_003",
+    "type": "task",
+    "title": "Task Completed: Setup Development Environment",
+    "description": "Task \"Setup Development Environment\" has been completed",
+    "timestamp": "2025-09-13T14:00:00.000Z",
+    "priority": "high",
+    "status": "completed",
+    "user": {
+      "id": "2",
+      "name": "suham iqbal",
+      "email": "suham@gmail.com",
+      "role": "super_admin"
+    },
+    "metadata": {
+      "taskId": "task_silver_ant_002",
+      "projectId": "project_silver_ant_001",
+      "organizationId": "1757768682797",
+      "action": "completed"
+    },
+    "isRead": false
+  }
+]

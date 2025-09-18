@@ -1,0 +1,32 @@
+[
+  {
+    "id": "upcoming",
+    "name": "Upcoming",
+    "color": "#6B7280",
+    "order": 1
+  },
+  {
+    "id": "in-progress",
+    "name": "In Progress",
+    "color": "#3B82F6",
+    "order": 2
+  },
+  {
+    "id": "review",
+    "name": "Review",
+    "color": "#F59E0B",
+    "order": 3
+  },
+  {
+    "id": "completed",
+    "name": "Completed",
+    "color": "#10B981",
+    "order": 4
+  },
+  {
+    "name": "on hold",
+    "color": "#3B82F6",
+    "order": 4,
+    "id": "1757435278961"
+  }
+]

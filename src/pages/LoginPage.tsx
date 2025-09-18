@@ -11,6 +11,13 @@ import { MessageSquare, Mail, Lock, Eye, EyeOff, Smartphone, ArrowRight } from "
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface LoginUser {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'user';
+}
+
 export const LoginPage = () => {
   const { toast } = useToast();
   const { login, user, isAuthenticated } = useAuth();
@@ -78,7 +85,7 @@ export const LoginPage = () => {
       
       // Safely parse JSON only when the response is JSON
       const contentType = response.headers.get('content-type') || '';
-      let data: any = null;
+      let data: { success?: boolean; error?: string; user?: LoginUser } | null = null;
       try {
         if (contentType.includes('application/json')) {
           data = await response.json();
@@ -217,7 +224,7 @@ export const LoginPage = () => {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">Silver Ant Marketing</span>
+            <span className="text-2xl font-bold text-gray-900">Task Management System</span>
           </div>
           
 
@@ -228,11 +235,13 @@ export const LoginPage = () => {
             {step === "forgot-password" && "Reset Password"}
           </h1>
           <p className="text-gray-600">
-            {step === "login" && "Sign in to your account to continue"}
+            {step === "login" && "Sign in to access task management"}
             {step === "2fa" && "Enter the 6-digit code from your authenticator app"}
             {step === "forgot-password" && "Enter your email to receive reset instructions"}
           </p>
         </div>
+
+
 
         {/* Login Form */}
         {step === "login" && (

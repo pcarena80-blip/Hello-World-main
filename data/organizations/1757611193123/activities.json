@@ -1,0 +1,220 @@
+[
+  {
+    "id": "activity_1758196823958",
+    "type": "project",
+    "title": "New Project Created: dsd",
+    "description": "Project \"dsd\" has been created - A fake freelance platform where devs get rewarded with “BugBucks” for writing spaghetti code and ignoring linting errors. Includes fake reviews like:\n\n\"Fixed nothing, blamed the client. 5 stars.\"",
+    "timestamp": "2025-09-18T12:00:23.958Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758196823957",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758102671881",
+    "type": "project",
+    "title": "New Project Created: one for all",
+    "description": "Project \"one for all\" has been created - Sets the visible range (zoom) to the specified range. Accepts two parameters of type Date that represent the first and last times of the wanted selected visible range. Set start to null to include everything from the earliest date to end; set end to null to include everything from start to the last date.",
+    "timestamp": "2025-09-17T09:51:11.881Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758102671880",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758099446111",
+    "type": "project",
+    "title": "New Project Created: CRM Dashboard",
+    "description": "Project \"CRM Dashboard\" has been created - Create  a crm dashboard that have properties of charts",
+    "timestamp": "2025-09-17T08:57:26.111Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758099446108",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757755771036",
+    "type": "project",
+    "title": "New Task Created: Develop API for User Authentication",
+    "description": "Task \"Develop API for User Authentication\" has been created in project \"KarenBot 3000\" - Create a RESTful API for user login, registration, and password recovery.\n\nTechnologies: Node.js, Express, JWT",
+    "timestamp": "2025-09-13T09:29:31.036Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "taskId": "task1757755771035",
+      "projectId": "project1757702613862",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757755545431",
+    "type": "project",
+    "title": "New Task Created: Develop A P I for User Authentication",
+    "description": "Task \"Develop A P I for User Authentication\" has been created in project \"bjhsbhca\" - Create a RESTful API for user login, registration, and password recovery.\n\nTechnologies: Node.js, Express, JWT",
+    "timestamp": "2025-09-13T09:25:45.431Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "taskId": "task1757755545429",
+      "projectId": "project1757702870092",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757702870093",
+    "type": "project",
+    "title": "New Project Created: bjhsbhca",
+    "description": "Project \"bjhsbhca\" has been created -  nc sdanc nsd c asdnm",
+    "timestamp": "2025-09-12T18:47:50.093Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757702870092",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757702613863",
+    "type": "project",
+    "title": "New Project Created: KarenBot 3000",
+    "description": "Project \"KarenBot 3000\" has been created - Uses a language model to generate over-the-top complaint emails and phone scripts about fake products (e.g., \"This AI toaster tried to gaslight me.\").",
+    "timestamp": "2025-09-12T18:43:33.863Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "name": {
+        "id": "2",
+        "name": "suham iqbal",
+        "email": "suham@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757702613862",
+      "organizationId": "1757611193123",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757702458145",
+    "type": "project",
+    "title": "Project Deleted: BugBucks",
+    "description": "Project \"BugBucks\" has been deleted",
+    "timestamp": "2025-09-12T18:40:58.145Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": "current-user",
+      "name": "current-user",
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757700335051",
+      "organizationId": "1757611193123",
+      "action": "deleted"
+    },
+    "isRead": false
+  }
+]

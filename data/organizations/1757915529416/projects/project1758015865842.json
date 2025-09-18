@@ -1,0 +1,75 @@
+{
+  "projectName": "Security Audit",
+  "description": "Scan for vulnerabilities and patch them.",
+  "status": "In Progress",
+  "priority": "Low",
+  "deadline": "2025-10-17",
+  "color": "#F43F5E",
+  "assignedTo": "Unassigned",
+  "tags": [],
+  "team": [],
+  "isStarred": false,
+  "budget": {
+    "allocated": 0,
+    "used": 0,
+    "currency": "USD"
+  },
+  "organizationId": "1757915529416",
+  "createdBy": {
+    "id": "1",
+    "name": "User",
+    "email": "user@example.com"
+  },
+  "permissions": {
+    "create": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "read": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "update": {
+      "level": "specific",
+      "specificUsers": [
+        "1"
+      ]
+    },
+    "delete": {
+      "level": "specific",
+      "specificUsers": [
+        "1"
+      ]
+    },
+    "assignToUser": {
+      "level": "specific",
+      "specificUsers": [
+        "1"
+      ]
+    },
+    "manageMembers": {
+      "level": "specific",
+      "specificUsers": [
+        "1"
+      ]
+    }
+  },
+  "id": "project1758015865842",
+  "createdAt": "2025-09-16T09:44:25.842Z",
+  "updatedAt": "2025-09-16T09:46:15.394Z",
+  "tasks": [
+    {
+      "id": "task1758015975394",
+      "taskName": "Scan",
+      "description": "Scan All the vulnerabilities",
+      "assignedTo": "Unassigned",
+      "deadline": "2025-10-03",
+      "startDate": "",
+      "status": "Upcoming",
+      "priority": "Medium",
+      "estimatedHours": 0,
+      "createdAt": "2025-09-16T09:46:15.394Z",
+      "updatedAt": "2025-09-16T09:46:15.394Z"
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "projectName": "bjhsbhca",
+  "description": " nc sdanc nsd c asdnm",
+  "status": "Planned",
+  "priority": "Medium",
+  "deadline": "2025-09-23",
+  "color": "#3B82F6",
+  "assignedTo": "Unassigned",
+  "tags": [],
+  "team": [],
+  "isStarred": false,
+  "budget": {
+    "allocated": 0,
+    "used": 0,
+    "currency": "USD"
+  },
+  "organizationId": "1757611193123",
+  "createdBy": {
+    "id": "2",
+    "name": "suham iqbal",
+    "email": "suham@gmail.com"
+  },
+  "permissions": {
+    "create": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "read": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "update": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    },
+    "delete": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    },
+    "assignToUser": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    },
+    "manageMembers": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    }
+  },
+  "id": "project1757702870092",
+  "createdAt": "2025-09-12T18:47:50.092Z",
+  "updatedAt": "2025-09-13T09:25:45.429Z",
+  "tasks": [
+    {
+      "id": "task1757755545429",
+      "taskName": "Develop A P I for User Authentication",
+      "description": "Create a RESTful API for user login, registration, and password recovery.\n\nTechnologies: Node.js, Express, JWT",
+      "assignedTo": "Unassigned",
+      "deadline": "2025-09-14",
+      "startDate": "",
+      "status": "In Progress",
+      "priority": "Medium",
+      "estimatedHours": 0,
+      "createdAt": "2025-09-13T09:25:45.429Z",
+      "updatedAt": "2025-09-13T09:25:45.429Z"
+    }
+  ]
+}

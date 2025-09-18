@@ -6,34 +6,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MessageSquare, ArrowLeft, Shield, Users, Building } from "lucide-react";
+import { MessageSquare, ArrowLeft, Shield, Users, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const roles = [
   {
     id: "admin",
-    title: "Admin (Organization Owner)",
-    description: "Full control over the system. Manage users, projects, and settings.",
-    icon: Building,
+    title: "Admin",
+    description: "Full control over task management. Create and assign tasks to team members.",
+    icon: Shield,
     features: [
-      "Create and manage organizations",
-      "Add/remove team members",
-      "Access to all features and reports",
-      "Customize branding and settings",
-      "Manage billing and subscriptions"
+      "Create and manage tasks",
+      "Assign tasks to users",
+      "Edit and delete any task",
+      "View all team progress",
+      "Access analytics dashboard"
     ]
   },
   {
-    id: "customer",
-    title: "Customer (End Client)",
-    description: "Access to your projects, support tickets, and communication.",
+    id: "user",
+    title: "Customer/User",
+    description: "Receive and manage assigned tasks. Track your personal progress.",
     icon: Users,
     features: [
-      "View assigned projects",
-      "Create support tickets",
-      "Access to project chat",
-      "View invoices and payments",
-      "Update profile and preferences"
+      "View assigned tasks only",
+      "Update task status",
+      "Add task comments",
+      "Track personal progress",
+      "Personal dashboard view"
     ]
   }
 ];
@@ -45,13 +45,15 @@ export const SignUpPage = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
+    phone: "",
     company: "",
     acceptTerms: false,
     acceptMarketing: false
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -74,6 +76,15 @@ export const SignUpPage = () => {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.acceptTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please accept the terms and conditions",
         variant: "destructive"
       });
       return;
@@ -128,7 +139,8 @@ export const SignUpPage = () => {
         body: JSON.stringify({
           name: formData.fullName,
           email: formData.email,
-          password: formData.password
+          password: formData.password,
+          role: selectedRole
         }),
       });
       
@@ -178,15 +190,15 @@ export const SignUpPage = () => {
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-gray-900">Silver Ant Marketing</span>
+            <span className="text-2xl font-bold text-gray-900">Task Management System</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {step === 1 ? "Choose Your Role" : "Create Your Account"}
           </h1>
           <p className="text-gray-600">
             {step === 1 
-              ? "Select how you'll use EnterpriseCRM" 
-              : "Join thousands of businesses already using our platform"
+              ? "Select your role in the task management system" 
+              : "Create your account to get started"
             }
           </p>
         </div>

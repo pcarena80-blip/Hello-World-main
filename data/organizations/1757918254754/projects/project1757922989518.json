@@ -1,0 +1,61 @@
+{
+  "projectName": "csadfcsacas",
+  "description": "cacacxsaxc",
+  "status": "Planned",
+  "priority": "Medium",
+  "deadline": "2025-10-25",
+  "color": "#3B82F6",
+  "assignedTo": "Unassigned",
+  "tags": [],
+  "team": [],
+  "isStarred": false,
+  "budget": {
+    "allocated": 0,
+    "used": 0,
+    "currency": "USD"
+  },
+  "organizationId": "1757918254754",
+  "createdBy": {
+    "id": "5",
+    "name": "Hammad",
+    "email": "hammad@gmail.com"
+  },
+  "permissions": {
+    "create": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "read": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "update": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    },
+    "delete": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    },
+    "assignToUser": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    },
+    "manageMembers": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    }
+  },
+  "id": "project1757922989518",
+  "createdAt": "2025-09-15T07:56:29.518Z",
+  "updatedAt": "2025-09-15T07:56:29.518Z",
+  "tasks": []
+}

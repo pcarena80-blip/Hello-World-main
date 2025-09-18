@@ -1,0 +1,61 @@
+{
+  "projectName": "one for all",
+  "description": "Sets the visible range (zoom) to the specified range. Accepts two parameters of type Date that represent the first and last times of the wanted selected visible range. Set start to null to include everything from the earliest date to end; set end to null to include everything from start to the last date.",
+  "status": "Completed",
+  "priority": "Medium",
+  "deadline": "2025-10-11",
+  "color": "#3B82F6",
+  "assignedTo": "Unassigned",
+  "tags": [],
+  "team": [],
+  "isStarred": false,
+  "budget": {
+    "allocated": 0,
+    "used": 0,
+    "currency": "USD"
+  },
+  "organizationId": "1757611193123",
+  "createdBy": {
+    "id": "2",
+    "name": "suham iqbal",
+    "email": "suham@gmail.com"
+  },
+  "permissions": {
+    "create": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "read": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "update": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    },
+    "delete": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    },
+    "assignToUser": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    },
+    "manageMembers": {
+      "level": "specific",
+      "specificUsers": [
+        "2"
+      ]
+    }
+  },
+  "id": "project1758102671880",
+  "createdAt": "2025-09-17T09:51:11.880Z",
+  "updatedAt": "2025-09-17T09:51:11.880Z",
+  "tasks": []
+}

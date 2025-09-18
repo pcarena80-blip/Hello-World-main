@@ -1,0 +1,75 @@
+{
+  "projectName": "CRM Dashboard",
+  "description": "Make CRM Dashboard using JavaScript",
+  "status": "In Progress",
+  "priority": "Medium",
+  "deadline": "2025-10-10",
+  "color": "#10B981",
+  "assignedTo": "Unassigned",
+  "tags": [],
+  "team": [],
+  "isStarred": false,
+  "budget": {
+    "allocated": 0,
+    "used": 0,
+    "currency": "USD"
+  },
+  "organizationId": "1757918254754",
+  "createdBy": {
+    "id": "5",
+    "name": "Hammad",
+    "email": "hammad@gmail.com"
+  },
+  "permissions": {
+    "create": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "read": {
+      "level": "all",
+      "specificUsers": []
+    },
+    "update": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    },
+    "delete": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    },
+    "assignToUser": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    },
+    "manageMembers": {
+      "level": "specific",
+      "specificUsers": [
+        "5"
+      ]
+    }
+  },
+  "id": "project1757918525597",
+  "createdAt": "2025-09-15T06:42:05.597Z",
+  "updatedAt": "2025-09-15T07:18:22.529Z",
+  "tasks": [
+    {
+      "id": "task1757920342713",
+      "taskName": " Dashboard Properties",
+      "description": "Divide Dashboard into Different Modules",
+      "assignedTo": "Unassigned",
+      "deadline": "",
+      "startDate": "",
+      "status": "Review",
+      "priority": "High",
+      "estimatedHours": 0,
+      "createdAt": "2025-09-15T07:12:22.713Z",
+      "updatedAt": "2025-09-15T07:12:22.713Z"
+    }
+  ]
+}

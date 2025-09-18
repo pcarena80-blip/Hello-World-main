@@ -1,0 +1,116 @@
+[
+  {
+    "id": "activity_1758015975395",
+    "type": "project",
+    "title": "New Task Created: Scan",
+    "description": "Task \"Scan\" has been created in project \"Security Audit\" - Scan All the vulnerabilities",
+    "timestamp": "2025-09-16T09:46:15.395Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "name": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "taskId": "task1758015975394",
+      "projectId": "project1758015865842",
+      "organizationId": "1757915529416",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758015865843",
+    "type": "project",
+    "title": "New Project Created: Security Audit",
+    "description": "Project \"Security Audit\" has been created - Scan for vulnerabilities and patch them.",
+    "timestamp": "2025-09-16T09:44:25.843Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "name": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758015865842",
+      "organizationId": "1757915529416",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758015686975",
+    "type": "project",
+    "title": "New Task Created: Analytics Dashboard",
+    "description": "Task \"Analytics Dashboard\" has been created in project \"Accounting\" - Add metrics like active users, tasks completed, and performance charts.",
+    "timestamp": "2025-09-16T09:41:26.975Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "name": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "taskId": "task1758015686973",
+      "projectId": "project1758015540437",
+      "organizationId": "1757915529416",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1758015540438",
+    "type": "project",
+    "title": "New Project Created: Accounting",
+    "description": "Project \"Accounting\" has been created - Prepare slides, record demo video, and present to stakeholders.",
+    "timestamp": "2025-09-16T09:39:00.438Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "name": {
+        "id": "1",
+        "name": "User",
+        "email": "user@example.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1758015540437",
+      "organizationId": "1757915529416",
+      "action": "created"
+    },
+    "isRead": false
+  }
+]

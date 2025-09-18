@@ -1,0 +1,173 @@
+[
+  {
+    "id": "1757611193123",
+    "name": "Technologiya Innovation",
+    "description": "",
+    "createdAt": "2025-09-11T17:19:53.123Z",
+    "createdBy": "2",
+    "members": [
+      {
+        "userId": "2",
+        "role": "super_admin",
+        "joinedAt": "2025-09-11T17:19:53.123Z",
+        "status": "active"
+      },
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-09-18T13:59:25.392Z",
+        "status": "active"
+      }
+    ],
+    "invitations": [
+      {
+        "id": "inv_1758203952076",
+        "email": "Khan.iqbal6361@gmail.com",
+        "role": "admin",
+        "invitedBy": "2",
+        "invitedAt": "2025-09-18T13:59:12.076Z",
+        "status": "accepted",
+        "acceptedAt": "2025-09-18T13:59:25.392Z"
+      }
+    ],
+    "memberCount": 2,
+    "settings": {
+      "allowGuestAccess": false,
+      "requireEmailVerification": true,
+      "defaultRole": "member",
+      "maxMembers": 100,
+      "features": {
+        "projects": true,
+        "tasks": true,
+        "chat": true,
+        "reports": true,
+        "integrations": true
+      }
+    },
+    "updatedAt": "2025-09-18T13:59:25.392Z"
+  },
+  {
+    "id": "1757768682797",
+    "name": "silver ant innovations",
+    "description": "",
+    "createdAt": "2025-09-13T13:04:42.797Z",
+    "createdBy": "2",
+    "members": [
+      {
+        "userId": "2",
+        "role": "super_admin",
+        "joinedAt": "2025-09-13T13:04:42.797Z",
+        "status": "active"
+      }
+    ],
+    "invitations": [],
+    "memberCount": 1,
+    "settings": {
+      "allowGuestAccess": false,
+      "requireEmailVerification": true,
+      "defaultRole": "member",
+      "maxMembers": 100,
+      "features": {
+        "projects": true,
+        "tasks": true,
+        "chat": true,
+        "reports": true,
+        "integrations": true
+      }
+    }
+  },
+  {
+    "id": "1757915529416",
+    "name": "ABC Marketing",
+    "description": "",
+    "createdAt": "2025-09-15T05:52:09.416Z",
+    "createdBy": "1",
+    "members": [
+      {
+        "userId": "1",
+        "role": "super_admin",
+        "joinedAt": "2025-09-15T05:52:09.416Z",
+        "status": "active"
+      },
+      {
+        "userId": "2",
+        "role": "member",
+        "joinedAt": "2025-09-16T09:39:33.437Z",
+        "status": "active"
+      }
+    ],
+    "invitations": [
+      {
+        "id": "inv_1758015560532",
+        "email": "suham@gmail.com",
+        "role": "member",
+        "invitedBy": "1",
+        "invitedAt": "2025-09-16T09:39:20.532Z",
+        "status": "accepted",
+        "acceptedAt": "2025-09-16T09:39:33.437Z"
+      }
+    ],
+    "memberCount": 2,
+    "settings": {
+      "allowGuestAccess": false,
+      "requireEmailVerification": true,
+      "defaultRole": "member",
+      "maxMembers": 100,
+      "features": {
+        "projects": true,
+        "tasks": true,
+        "chat": true,
+        "reports": true,
+        "integrations": true
+      }
+    },
+    "updatedAt": "2025-09-16T09:39:33.437Z"
+  },
+  {
+    "id": "1757918254754",
+    "name": "Technologiya World",
+    "description": "",
+    "createdAt": "2025-09-15T06:37:34.754Z",
+    "createdBy": "5",
+    "members": [
+      {
+        "userId": "5",
+        "role": "super_admin",
+        "joinedAt": "2025-09-15T06:37:34.754Z",
+        "status": "active"
+      },
+      {
+        "userId": "2",
+        "role": "manager",
+        "joinedAt": "2025-09-15T10:49:06.116Z",
+        "status": "active"
+      }
+    ],
+    "invitations": [
+      {
+        "id": "inv_1757933330587",
+        "email": "suham@gmail.com",
+        "role": "manager",
+        "invitedBy": "5",
+        "invitedAt": "2025-09-15T10:48:50.587Z",
+        "status": "accepted",
+        "acceptedAt": "2025-09-15T10:49:06.116Z"
+      }
+    ],
+    "memberCount": 2,
+    "settings": {
+      "allowGuestAccess": false,
+      "requireEmailVerification": true,
+      "defaultRole": "member",
+      "maxMembers": 100,
+      "features": {
+        "projects": true,
+        "tasks": true,
+        "chat": true,
+        "reports": true,
+        "integrations": true
+      }
+    },
+    "updatedAt": "2025-09-15T10:49:06.116Z"
+  }
+]

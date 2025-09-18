@@ -1,0 +1,45 @@
+[
+  {
+    "id": "activity_silver_ant_001",
+    "type": "project_created",
+    "title": "New Project Created: Silver Ant Mobile App",
+    "description": "Project \"Silver Ant Mobile App\" has been created - Develop a mobile application for Silver Ant Innovations",
+    "timestamp": "2025-09-13T14:00:00.000Z",
+    "priority": "high",
+    "status": "completed",
+    "user": {
+      "id": "2",
+      "name": "suham iqbal",
+      "email": "suham@gmail.com",
+      "role": "super_admin"
+    },
+    "metadata": {
+      "projectId": "project_silver_ant_001",
+      "organizationId": "1757768682797",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_silver_ant_002",
+    "type": "task_completed",
+    "title": "Task Completed: Setup Development Environment",
+    "description": "Task \"Setup Development Environment\" has been completed",
+    "timestamp": "2025-09-13T14:00:00.000Z",
+    "priority": "high",
+    "status": "completed",
+    "user": {
+      "id": "2",
+      "name": "suham iqbal",
+      "email": "suham@gmail.com",
+      "role": "super_admin"
+    },
+    "metadata": {
+      "taskId": "task_silver_ant_002",
+      "projectId": "project_silver_ant_001",
+      "organizationId": "1757768682797",
+      "action": "completed"
+    },
+    "isRead": false
+  }
+]

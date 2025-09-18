@@ -1,0 +1,26 @@
+{
+  "id": "project_silver_ant_002",
+  "projectName": "Silver Ant Website Redesign",
+  "description": "Redesign the company website with modern UI/UX",
+  "status": "upcoming",
+  "priority": "medium",
+  "startDate": "2025-09-20T00:00:00.000Z",
+  "endDate": "2025-11-15T23:59:59.000Z",
+  "createdAt": "2025-09-13T14:00:00.000Z",
+  "updatedAt": "2025-09-13T14:00:00.000Z",
+  "createdBy": "2",
+  "assignedTo": "2",
+  "organizationId": "1757768682797",
+  "members": [
+    {
+      "userId": "2",
+      "role": "designer",
+      "joinedAt": "2025-09-13T14:00:00.000Z"
+    }
+  ],
+  "tags": ["website", "design", "ui-ux"],
+  "progress": 0,
+  "budget": 25000,
+  "client": "Silver Ant Innovations",
+  "notes": "Website redesign project for better user experience."
+}

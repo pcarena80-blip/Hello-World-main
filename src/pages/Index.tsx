@@ -1,9 +1,19 @@
 import { CRMSidebar } from "@/components/CRMSidebar";
 import { TopBar } from "@/components/TopBar";
-import { TaskItem } from "@/components/TaskItem";
 import { LeadItem } from "@/components/LeadItem";
 import { DealItem } from "@/components/DealItem";
+import { DealPipeline } from "@/components/DealPipeline";
+import { DealForm } from "@/components/DealForm";
+import { DealFilters } from "@/components/DealFilters";
+import { DealProvider } from "@/contexts/DealContext";
 import AIChatDashboard from "@/components/AIChatDashboard";
+import { Organization } from "@/components/Organization";
+import { AsanaOrganization } from "@/components/AsanaOrganization";
+import { AsanaStyleTaskManagement } from "@/components/AsanaStyleTaskManagement";
+import SettingsComponent from "@/components/Settings";
+import { TeamChat } from "@/components/TeamChat";
+import { CustomStatusManager } from "@/components/CustomStatusManager";
+import { AdvancedOrganizationDashboard } from "@/components/AdvancedOrganizationDashboard";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCRMData } from "@/useCRMData";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
+
 import {
   Rocket,
   CheckCircle,
@@ -60,6 +72,7 @@ import {
   ChevronRight,
   Download,
   Globe,
+  Bot,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -73,6 +86,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { io, Socket } from "socket.io-client";
+import ChatReplySuggestions from "@/components/ChatReplySuggestions";
 
 type ChatMode = "private" | "general" | "group";
 
@@ -108,12 +122,46 @@ type UserScore = {
   rank: number;
 };
 
+interface User {
+  id: number | string;
+  name: string;
+  email: string;
+  role?: string;
+  isOnline?: boolean;
+  lastSeen?: Date;
+  lastMessageTime?: number;
+  lastMessage?: string;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  sender?: string;
+  senderId?: string;
+  timestamp: Date | string;
+  chatId?: string;
+  edited?: boolean;
+  deleted?: boolean;
+  editTimestamp?: Date | string;
+  readBy?: string[];
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'received';
+}
+
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  message: Message;
+}
+
 const Index = () => {
   const { toast } = useToast();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, isAdmin } = useAuth();
+  const { currentOrganization } = useOrganization();
   
   // Move ALL hooks to the top, before any conditional returns
   const [currentView, setCurrentView] = useState("overview");
+  const [showAdvancedDashboard, setShowAdvancedDashboard] = useState(false);
   const [chatMode, setChatMode] = useState<ChatMode>("general");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -126,61 +174,55 @@ const Index = () => {
   // AI Chat state
   const [selectedAI, setSelectedAI] = useState<'gemini' | 'chatgpt' | 'cohere' | 'deepai'>('gemini');
   const [isAIDropdownOpen, setIsAIDropdownOpen] = useState(false);
+  
+  // Mobile sidebar state
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Search functionality for Private Chat
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   // Socket.IO connection for real-time messaging
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+
   // Only call useCRMData when user is authenticated
   const { data: crmData, isLoading, error } = useCRMData();
-
-  // Mock user data for chat - moved to top to fix hoisting issue
-  const mockUsers: UserT[] = [];
 
   // Initialize empty messages for private chats
   const [privateMessages, setPrivateMessages] = useState<Record<string, ChatMessage[]>>({});
 
-  // Mock messages for general chat - only keep basic team messages
-  const mockGeneralMessages: ChatMessage[] = [];
-
-  // Remove all dummy private messages - start with empty conversations
-  const mockPrivateMessages: Record<string, ChatMessage[]> = {};
-
-  // Mock user scores - replace with real data from backend
-  const mockUserScores: UserScore[] = [];
-
   // Chat functionality state
-  const [users, setUsers] = useState<any[]>([]);
-  const [selectedChatUser, setSelectedChatUser] = useState<any>(null);
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedChatUser, setSelectedChatUser] = useState<User | null>(null);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [showReplySuggestions, setShowReplySuggestions] = useState(false);
+  const [lastIncomingMessage, setLastIncomingMessage] = useState<{
+    id: string;
+    content: string;
+    senderId: string;
+    senderName?: string;
+  } | null>(null);
   const [chatInput, setChatInput] = useState('');
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [sortedUsers, setSortedUsers] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [sortedUsers, setSortedUsers] = useState<User[]>([]);
   
   // Message deduplication - track processed message IDs
   const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set());
 
   // Context menu state
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    message: any;
-  } | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [editingMessage, setEditingMessage] = useState<{
     id: string;
     content: string;
   } | null>(null);
 
   // Context menu functions
-  const handleMessageRightClick = (e: React.MouseEvent, message: any) => {
+  const handleMessageRightClick = (e: React.MouseEvent, message: Message) => {
     e.preventDefault();
     setContextMenu({
       visible: true,
@@ -194,7 +236,7 @@ const Index = () => {
     setContextMenu(null);
   };
 
-  const isMessageEditable = (message: any) => {
+  const isMessageEditable = (message: Message) => {
     if (!message.timestamp) return false;
     const messageTime = new Date(message.timestamp).getTime();
     const currentTime = Date.now();
@@ -202,7 +244,7 @@ const Index = () => {
     return (currentTime - messageTime) <= oneMinute;
   };
 
-  const handleEditMessage = (message: any) => {
+  const handleEditMessage = (message: Message) => {
     setEditingMessage({
       id: message.id,
       content: message.content
@@ -210,7 +252,7 @@ const Index = () => {
     closeContextMenu();
   };
 
-  const handleDeleteMessage = async (message: any) => {
+  const handleDeleteMessage = async (message: Message) => {
     try {
       // Mark message as deleted locally
       setChatMessages(prev => prev.map(msg => 
@@ -236,7 +278,7 @@ const Index = () => {
     closeContextMenu();
   };
 
-  const handleForwardMessage = (message: any) => {
+  const handleForwardMessage = (message: Message) => {
     // TODO: Implement forward functionality
     console.log('📤 Forwarding message:', message.id);
     toast({
@@ -294,20 +336,22 @@ const Index = () => {
   }, [contextMenu?.visible]);
 
   // Function to sort users by last message time (WhatsApp-style) with rate limiting
-  const sortUsersByLastMessage = useCallback(async () => {
+  const sortUsersByLastMessage = useCallback(async (usersList?: User[]) => {
     if (!user?.id) {
       console.log('❌ No user ID, skipping sort');
       return;
     }
     
-    if (!users || users.length === 0) {
+    // Use provided usersList or current users state
+    const currentUsers = usersList || users;
+    if (!currentUsers || currentUsers.length === 0) {
       console.log('❌ No users to sort');
       return;
     }
     
     try {
       console.log('🔄 Sorting users by last message...');
-      console.log('👥 Current users array:', users);
+      console.log('👥 Current users array:', currentUsers.length);
       console.log('👤 Current user ID:', user.id);
       
       // Get all messages
@@ -316,21 +360,21 @@ const Index = () => {
       console.log('📨 Messages loaded:', allMessages.length);
       
       // Get all users except current user
-      const otherUsers = users.filter((userItem: any) => 
+      const otherUsers = currentUsers.filter((userItem: User) => 
         userItem.id.toString() !== user.id.toString()
       );
       console.log('👥 Other users (excluding current):', otherUsers.length);
       
       // Calculate last message time for each user
-      const usersWithLastMessage = otherUsers.map((userItem: any) => {
+      const usersWithLastMessage = otherUsers.map((userItem: User) => {
         const selfId = user.id.toString();
         const peerId = userItem.id.toString();
         const chatId = [selfId, peerId].sort().join('-');
         
         // Find the latest message in this chat
-        const chatMessages = allMessages.filter((msg: any) => msg.chatId === chatId);
+        const chatMessages = allMessages.filter((msg: Message) => msg.chatId === chatId);
         const lastMessage = chatMessages.length > 0 
-          ? chatMessages.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
+          ? chatMessages.sort((a: Message, b: Message) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
           : null;
         
         return {
@@ -342,19 +386,20 @@ const Index = () => {
       
       // Sort by last message time (most recent first)
       const sorted = usersWithLastMessage.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
-      console.log('✅ Sorted users:', sorted);
+      console.log('✅ Sorted users:', sorted.length);
       setSortedUsers(sorted);
       console.log('✅ Users sorted successfully');
     } catch (error) {
       console.error('❌ Error sorting users by last message:', error);
       // Fallback to original user list
-      const otherUsers = users.filter((userItem: any) => 
+      const currentUsers = usersList || users;
+      const otherUsers = currentUsers.filter((userItem: User) => 
         userItem.id.toString() !== user.id.toString()
       );
-      console.log('🔄 Fallback: setting unsorted users:', otherUsers);
+      console.log('🔄 Fallback: setting unsorted users:', otherUsers.length);
       setSortedUsers(otherUsers);
     }
-  }, [user?.id, users]);
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Chat functions - defined early to avoid initialization errors
   const loadChatMessages = useCallback(async () => {
@@ -371,7 +416,7 @@ const Index = () => {
       const allMessages = await response.json();
       
       // Filter messages for this chat
-      const chatMessages = allMessages.filter((msg: any) => msg.chatId === chatId);
+      const chatMessages = allMessages.filter((msg: Message) => msg.chatId === chatId);
       setChatMessages(chatMessages);
     } catch (error) {
       console.error('Error loading chat messages:', error);
@@ -404,13 +449,13 @@ const Index = () => {
   // Initialize messages based on chat mode/user and seed leaderboard
   useEffect(() => {
     if (chatMode === "general") {
-      setMessages(mockGeneralMessages);
+      setMessages([]);
     } else if (selectedUser) {
       setMessages(privateMessages[selectedUser] || []);
     } else {
       setMessages([]);
     }
-    setUserScores(mockUserScores);
+    setUserScores([]);
   }, [chatMode, selectedUser, privateMessages]);
 
   // Update messages when selectedUser changes
@@ -482,7 +527,7 @@ const Index = () => {
         setCurrentUser(user);
         
         // Initialize sortedUsers with users data immediately
-        const otherUsers = usersData.filter((userItem: any) => 
+        const otherUsers = usersData.filter((userItem: User) => 
           userItem.id.toString() !== user.id.toString()
         );
         setSortedUsers(otherUsers);
@@ -493,7 +538,7 @@ const Index = () => {
         console.log('👥 Users array set:', usersData.length);
         
         // Sort users by last message time after loading
-        setTimeout(() => sortUsersByLastMessage(), 100);
+        setTimeout(() => sortUsersByLastMessage(usersData), 100);
       } catch (error) {
         console.error('❌ Error loading users:', error);
       } finally {
@@ -510,7 +555,7 @@ const Index = () => {
       console.log('👤 User state:', user);
       console.log('🔐 Is authenticated:', isAuthenticated);
     }
-  }, [user, isAuthenticated]); // Added isAuthenticated dependency
+  }, [user, isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load messages when user selection changes
   useEffect(() => {
@@ -526,7 +571,7 @@ const Index = () => {
       // Load existing messages
       loadChatMessages();
     }
-  }, [selectedChatUser, currentUser, socket]); // Removed loadChatMessages dependency
+  }, [selectedChatUser, currentUser, socket, loadChatMessages]);
 
   // Mark messages as read when chat is opened
   useEffect(() => {
@@ -585,7 +630,7 @@ const Index = () => {
       timestamp: new Date().toISOString(),
       edited: false,
       deleted: false,
-      status: 'sent',
+      status: 'sent' as const,
       readBy: []
     };
     
@@ -600,14 +645,16 @@ const Index = () => {
       timestamp: new Date().toISOString(),
       edited: false,
       deleted: false,
-      status: 'sending', // Mark as sending
+      status: 'sending' as const, // Mark as sending
       readBy: []
     };
     
     setChatMessages(prev => [...prev, tempMessage]);
     
-    // Clear input immediately for better UX
+    // Clear input immediately for better UX and hide reply suggestions
     setChatInput('');
+    setShowReplySuggestions(false);
+    setLastIncomingMessage(null);
     
     // Send message to server via socket only (backend will save it)
     if (socket) {
@@ -639,7 +686,7 @@ const Index = () => {
       const allUsers = await response.json();
       
       // Filter out the current logged-in user
-      const otherUsers = allUsers.filter((userItem: any) => 
+      const otherUsers = allUsers.filter((userItem: User) => 
         userItem.id.toString() !== user.id.toString()
       );
       
@@ -648,7 +695,7 @@ const Index = () => {
         setSearchResults(sortedUsers);
       } else {
         // Filter users based on search query (name or email)
-        const filteredUsers = otherUsers.filter((userItem: any) => 
+        const filteredUsers = otherUsers.filter((userItem: User) => 
           userItem.name.toLowerCase().includes(query.toLowerCase()) ||
           userItem.email.toLowerCase().includes(query.toLowerCase())
         );
@@ -660,7 +707,7 @@ const Index = () => {
     } finally {
       setIsSearching(false);
     }
-  }, [user?.id]);
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Search effect with debouncing
   useEffect(() => {
@@ -676,20 +723,23 @@ const Index = () => {
     }, 500); // Increased debounce time to reduce API calls
     
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, isAuthenticated, user, searchUsers]); // Removed sortedUsers dependency to prevent infinite loops
+  }, [searchQuery, isAuthenticated, user, searchUsers]); // eslint-disable-line react-hooks/exhaustive-deps
   
-  // Load all users on component mount
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      // Initialize with sorted users
-      setTimeout(() => sortUsersByLastMessage(), 100);
-    }
-  }, [isAuthenticated, user]); // Removed sortUsersByLastMessage dependency to prevent infinite loops
+  // Load all users on component mount - removed to prevent infinite loop
+  // sortUsersByLastMessage is now called only from the loadUsers function
   
   // Socket.IO connection setup
   useEffect(() => {
     if (isAuthenticated && user) {
-      const serverUrl = (import.meta as any).env?.VITE_SERVER_URL || 'http://localhost:3001';
+      // Define a type for Vite's import.meta.env
+      interface ImportMeta {
+        env: {
+          VITE_SERVER_URL?: string;
+          [key: string]: string | undefined;
+        };
+      }
+      
+      const serverUrl = import.meta.env?.VITE_SERVER_URL || 'http://localhost:3001';
       console.log('🔌 Connecting to Socket.IO server:', serverUrl);
       
       const newSocket = io(serverUrl, { 
@@ -765,7 +815,7 @@ const Index = () => {
       });
       
       // Listen for incoming messages
-      const handleReceiveMessage = (message: any) => {
+      const handleReceiveMessage = (message: Message) => {
         console.log('📨 Received real-time message:', message);
         
         // Skip if this is our own message (we already added it locally)
@@ -783,7 +833,7 @@ const Index = () => {
           timestamp: message.timestamp,
           edited: false,
           deleted: false,
-          status: 'received',
+          status: 'received' as const,
           readBy: []
         };
         
@@ -806,6 +856,16 @@ const Index = () => {
               // Add new message
               return [...prev, newMessage];
             });
+            
+            // Show reply suggestions for incoming messages
+            const senderName = users.find(u => u.id.toString() === message.senderId)?.name || 'Unknown';
+            setLastIncomingMessage({
+              id: message.id,
+              content: message.content,
+              senderId: message.senderId,
+              senderName: senderName
+            });
+            setShowReplySuggestions(true);
             
             // Update sorted users to reflect new message order
             setTimeout(() => sortUsersByLastMessage(), 100);
@@ -832,14 +892,14 @@ const Index = () => {
       newSocket.on('receiveMessage', handleReceiveMessage);
 
       // Listen for loading existing messages
-      const handleLoadMessages = (messages: any) => {
+      const handleLoadMessages = (messages: Message[]) => {
         console.log('📚 Loading existing messages:', messages.length);
         
         if (selectedChatUser) {
           const selfId = user.id.toString();
           const peerId = selectedChatUser.id.toString();
           const chatId = [selfId, peerId].sort().join('-');
-          const chatMessages = messages.filter((m: any) => m.chatId === chatId);
+          const chatMessages = messages.filter((m: Message) => m.chatId === chatId);
           setChatMessages(chatMessages);
           
           // Update sorted users after loading messages
@@ -848,7 +908,7 @@ const Index = () => {
       };
 
       // Listen for message delivery status
-      const handleMessageDelivered = (data: any) => {
+      const handleMessageDelivered = (data: { messageId: string }) => {
         console.log('✅ Message delivered:', data);
         
         // Update message status to delivered
@@ -858,7 +918,7 @@ const Index = () => {
       };
       
       // Listen for message read status
-      const handleMessagesRead = (data: any) => {
+      const handleMessagesRead = (data: { messageIds: string[] }) => {
         console.log('👁️ Messages read:', data);
         
         // Update message status to read
@@ -868,7 +928,7 @@ const Index = () => {
       };
       
       // Listen for new user registrations
-      const handleNewUserRegistered = (newUser: any) => {
+      const handleNewUserRegistered = (newUser: User) => {
         console.log('👤 New user registered via Socket.IO:', newUser);
         
         // Add new user to users array
@@ -962,7 +1022,7 @@ const Index = () => {
   // Show loading state while auth is initializing
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="responsive-layout bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-gray-600">Initializing authentication...</p>
@@ -974,7 +1034,7 @@ const Index = () => {
   // Show authentication error if user is not authenticated
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="responsive-layout bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Lock className="h-8 w-8 text-red-600" />
@@ -993,7 +1053,7 @@ const Index = () => {
   // Show loading state for CRM data
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="responsive-layout bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
           <p className="text-gray-600">Loading Dashboard...</p>
@@ -1005,7 +1065,7 @@ const Index = () => {
   // Show error state for CRM data
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="responsive-layout bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="h-8 w-8 text-red-600" />
@@ -1089,300 +1149,12 @@ const Index = () => {
     setNewMessage("");
   };
 
-  const renderOverview = () => (
-    <>
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Your Sales Analysis</h1>
-            <p className="text-muted-foreground">Comprehensive overview of your business performance</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Button className="bg-blue-600 hover:bg-blue-700">+ Add Widget</Button>
-            <Button variant="outline" size="icon">
-              <Eye className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <Maximize2 className="w-4 h-4" />
-            </Button>
-            <Button variant="outline">Filter</Button>
-          </div>
-        </div>
-      </div>
-
-      {/* AI Assistant Widget */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <Card className="lg:col-span-1 bg-gradient-to-br to-black from-gray-900 via-purple-900 text-white border-0 shadow-xl">
-          <CardContent className="p-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold">Gemini AI Assistant</h3>
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <Brain className="w-5 h-5" />
-                </div>
-              </div>
-              <p className="text-blue-100 mb-6 leading-relaxed">
-                Powered by Google Gemini. Get intelligent insights and assistance for your business needs.
-              </p>
-              <Button className="w-full bg-orange-500 hover:bg-orange-600 border-0" onClick={() => setCurrentView("ai-chat")}>
-                Chat with Gemini
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Sales Widget */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <DollarSign className="w-5 h-5 text-blue-600" />
-                <CardTitle className="text-lg">Total Sales</CardTitle>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Select defaultValue="week">
-                  <SelectTrigger className="w-20 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="week">Week</SelectItem>
-                    <SelectItem value="month">Month</SelectItem>
-                    <SelectItem value="year">Year</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Mon</span>
-                <span className="text-muted-foreground">Tue</span>
-                <span className="text-muted-foreground">Wed</span>
-                <span className="text-muted-foreground">Thur</span>
-                <span className="text-muted-foreground">Fri</span>
-                <span className="text-muted-foreground">Sat</span>
-              </div>
-              <div className="flex justify-between items-end h-32">
-                <div className="w-8 bg-orange-500 rounded-t-sm h-14 relative">
-                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-600">$450.60</span>
-                </div>
-                <div className="w-8 bg-orange-500 rounded-t-sm h-20 relative">
-                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-600">$542.34</span>
-                </div>
-                <div className="w-8 bg-orange-500 rounded-t-sm h-24 relative">
-                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-600">$750.26</span>
-                </div>
-                <div className="w-8 bg-orange-500 rounded-t-sm h-28 relative">
-                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-600">$890.58</span>
-                </div>
-                <div className="w-8 bg-orange-500 rounded-t-sm h-24 relative">
-                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-600">$750.26</span>
-                </div>
-                <div className="w-8 bg-orange-500 rounded-t-sm h-28 relative">
-                  <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-orange-600">$890.58</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Sales Revenue Widget */}
-        <Card className="lg:col-span-1">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Wallet className="w-5 h-5 text-green-600" />
-                <CardTitle className="text-lg">Sales Revenue</CardTitle>
-              </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-1 mb-2">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-sm text-green-600 font-medium">24% for 1 day</span>
-                </div>
-                <div className="text-2xl font-bold text-green-600 mb-1">$1,609.18</div>
-                <div className="flex items-center justify-center space-x-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Received Amount</span>
-                </div>
-                <div className="h-16 bg-green-100 rounded mt-2 flex items-end justify-center">
-                  <div className="w-full bg-green-500 rounded h-12"></div>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center space-x-1 mb-2">
-                  <TrendingDown className="w-4 h-4 text-red-500" />
-                  <span className="text-sm text-red-600 font-medium">8%</span>
-                </div>
-                <div className="text-2xl font-bold text-red-600 mb-1">$2,189.21</div>
-                <div className="flex items-center justify-center space-x-1">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-xs text-muted-foreground">Ordered Amount</span>
-                </div>
-                <div className="h-16 bg-red-100 rounded mt-2 flex items-end justify-center">
-                  <div className="w-full bg-red-500 rounded h-8"></div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Bottom Row Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Sales Widget */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-blue-600" />
-                <CardTitle className="text-lg">Recent Sales</CardTitle>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Select defaultValue="week">
-                  <SelectTrigger className="w-20 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="day">Day</SelectItem>
-                    <SelectItem value="week">Week</SelectItem>
-                    <SelectItem value="month">Month</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { name: "Uzair", time: "Today", status: "New", amount: "+$324.99", statusColor: "bg-green-100 text-green-800" },
-                { name: "Umair", time: "2 Days Ago", status: "New", amount: "+$200.00", statusColor: "bg-green-100 text-green-800" },
-                { name: "Hannan", time: "1 Day Ago", status: "Cancelled", amount: "", statusColor: "bg-red-100 text-red-800" },
-                { name: "Samreen", time: "2 Days Ago", status: "Completed", amount: "+$840.99", statusColor: "bg-purple-100 text-purple-800" },
-              ].map((sale, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback className="text-xs bg-gray-100">
-                        {sale.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{sale.name}</p>
-                      <p className="text-xs text-muted-foreground">{sale.time}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={sale.statusColor}>{sale.status}</Badge>
-                    {sale.amount && <span className="text-sm font-medium text-green-600">{sale.amount}</span>}
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <ExternalLink className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Growth Widget */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Rocket className="w-5 h-5 text-purple-600" />
-                <CardTitle className="text-lg">Growth</CardTitle>
-              </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="text-center">
-            <div className="relative w-32 h-32 mx-auto mb-4">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="8" />
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke="#8b5cf6"
-                  strokeWidth="8"
-                  strokeDasharray="251.2"
-                  strokeDashoffset="67.8"
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold text-purple-600">+73.1%</div>
-                <div className="text-xs text-muted-foreground">Growth rate</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Top Item Sales Widget */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Package className="w-5 h-5 text-blue-600" />
-                <CardTitle className="text-lg">Top Item Sales</CardTitle>
-              </div>
-              <Button variant="ghost" className="text-sm text-blue-600 hover:text-blue-700">
-                View All &gt;
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { name: "Infinix Smartphone", category: "Mobiles", amount: "$320.24", change: "+12%", changeColor: "text-green-600" },
-                { name: "Khaadi Kurta", category: "Clothing", amount: "$180.90", change: "-23%", changeColor: "text-red-600" },
-                { name: "Cricket Bat", category: "Sports", amount: "$124.00", change: "+42%", changeColor: "text-green-600" },
-                { name: "Harry Potter and the Cursed Child", category: "Books", amount: "$100.40", change: "+29%", changeColor: "text-green-600" },
-              ].map((item, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">{item.category}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{item.amount}</p>
-                      <p className={`text-xs ${item.changeColor}`}>{item.change}</p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-500 h-2 rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${Math.min(100, 60 + index * 10)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
+  const renderOverview = () => {
+    // Show organization dashboard
+    return (
+      <AdvancedOrganizationDashboard />
+    );
+  };
 
   const renderLeads = () => (
     <>
@@ -1400,492 +1172,28 @@ const Index = () => {
   );
 
   const renderDeals = () => (
-    <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Deals</h1>
-        <p className="text-muted-foreground">Track your sales opportunities</p>
-      </div>
-
-      <div className="space-y-4">
-        {crmData?.deals.map((deal) => (
-          <DealItem
-            key={deal.id}
-            title={deal.title}
-            company={deal.company}
-            value={deal.value}
-            stage={deal.stage}
-            probability={deal.probability}
-            closeDate={deal.closeDate}
-            owner={deal.owner}
-          />
-        ))}
-      </div>
-    </>
-  );
-
-  const renderTasks = () => (
-    <>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Tasks</h1>
-        <p className="text-muted-foreground">Manage your daily tasks</p>
-      </div>
-
-      <div className="space-y-4">
-        {crmData?.tasks.map((task) => (
-          <TaskItem key={task.id} title={task.title} dueDate={task.dueDate} onMarkDone={() => handleMarkTaskDone(task.id)} />
-        ))}
-      </div>
-    </>
-  );
-
-    const renderChat = () => {
-    return (
-      <>
-        {/* Full-Screen Team Chat Mode */}
-        <div className="fixed inset-0 bg-white z-50">
-          {/* Chat Header */}
-          <div className="h-16 bg-white border-b flex items-center justify-between px-4">
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => {
-                  if (selectedChatUser) {
-                    setSelectedChatUser(null);
-                  } else {
-                    setCurrentView("overview");
-                  }
-                }} 
-                className="hover:bg-gray-100"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div className="flex items-center space-x-2">
-                <MessageSquare className="w-5 h-5 text-green-600" />
-                <h1 className="text-lg font-bold text-gray-900">Messages</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-                <Search className="w-5 h-5 text-gray-600" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-                <MoreHorizontal className="w-5 h-5 text-gray-600" />
-              </Button>
-            </div>
-          </div>
-
-          {/* True Responsive Layout - One Panel at a Time on Mobile */}
-          <div className="h-[calc(100vh-64px)] relative">
-            {/* Mobile: Show Chat List OR Chat Area (not both) */}
-            {/* Desktop: Show both side by side */}
-            
-            {/* Chat List Panel */}
-            <div className={`${
-              selectedChatUser 
-                ? 'hidden md:block md:absolute md:left-0 md:top-0 md:bottom-0 md:w-80' 
-                : 'block absolute inset-0 md:relative md:w-80'
-            } bg-white border-gray-200 border-r flex flex-col min-w-0 z-10 transition-all duration-300 ease-in-out`}>
-              {/* Chat List Header with Tabs */}
-              <div className="p-3 border-b bg-white border-gray-200">
-                <div className="flex space-x-1 mb-3">
-                  <button className="px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg">
-                    General {chatMessages.filter(m => !m.readBy?.includes(currentUser?.id?.toString())).length}
-                  </button>
-                  <button className="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-lg">
-                    Archive 0
-                  </button>
-                  <button 
-                    onClick={() => {
-                      // Manual refresh of users
-                      const loadUsers = async () => {
-                        try {
-                          const response = await fetch('/api/register.json');
-                          if (response.ok) {
-                            const usersData = await response.json();
-                            setUsers(usersData);
-                            const otherUsers = usersData.filter((userItem: any) => 
-                              userItem.id.toString() !== user?.id?.toString()
-                            );
-                            setSortedUsers(otherUsers);
-                            toast({
-                              title: "Users Refreshed",
-                              description: `Found ${usersData.length} users`,
-                              variant: "default"
-                            });
-                          }
-                        } catch (error) {
-                          console.error('Error refreshing users:', error);
-                        }
-                      };
-                      loadUsers();
-                    }}
-                    className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 rounded-lg border border-blue-200 hover:border-blue-300"
-                  >
-                    <RefreshCw className="w-4 h-4 inline mr-1" />
-                    Refresh
-                  </button>
-                </div>
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="w-full pl-10 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Chat List */}
-              <div className="flex-1 overflow-y-auto overscroll-contain -webkit-overflow-scrolling-touch">
-                {isLoadingUsers ? (
-                  <div className="p-4 text-center text-gray-500">
-                    <Loader2 className="w-8 h-8 mx-auto mb-2 text-gray-300 animate-spin" />
-                    <p className="text-sm">Loading chats...</p>
-                  </div>
-                ) : sortedUsers.length > 0 ? (
-                  sortedUsers.map((user) => {
-                    const unreadCount = chatMessages.filter(m => 
-                      m.chatId === [currentUser?.id, user.id].sort().join('-') && 
-                      !m.readBy?.includes(currentUser?.id?.toString()) &&
-                      m.senderId !== currentUser?.id?.toString()
-                    ).length;
-                    
-                    return (
-                      <button
-                        key={user.id}
-                        onClick={() => setSelectedChatUser(user)}
-                        className={`w-full text-left p-3 border-b hover:bg-gray-50 active:bg-gray-100 transition-colors ${
-                          selectedChatUser?.id === user.id ? 'bg-green-50 border-green-200' : ''
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          {/* Avatar */}
-                          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-medium text-gray-600">
-                              {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                            </span>
-                          </div>
-                          
-                          {/* Chat Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="font-medium text-gray-900 truncate">{user.name}</div>
-                              <div className="flex items-center space-x-2">
-                                <div className={`w-2 h-2 rounded-full ${user.isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                <span className="text-xs text-gray-400">
-                                  {user.lastMessageTime ? new Date(user.lastMessageTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            {/* Last Message Preview */}
-                            {user.lastMessage && (
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-600 truncate flex-1">
-                                  {user.lastMessage}
-                                </span>
-                                <div className="flex items-center space-x-1">
-                                  <div className="w-2 h-2 text-green-500">✓</div>
-                                  {unreadCount > 0 && (
-                                    <span className="w-5 h-5 bg-green-500 text-white text-xs rounded-full flex items-center justify-center">
-                                      {unreadCount}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })
-                ) : users.length > 0 ? (
-                  // Fallback: show users from users array if sortedUsers is empty
-                  <>
-                    <div className="p-2 text-xs text-gray-400 bg-green-50 border-b">
-                      Fallback: Showing users from users array
-                    </div>
-                    {users.filter((userItem: any) => 
-                      userItem.id.toString() !== currentUser?.id?.toString()
-                    ).map((user) => (
-                      <button
-                        key={user.id}
-                        onClick={() => setSelectedChatUser(user)}
-                        className="w-full text-left p-3 border-b hover:bg-gray-50 active:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-sm font-medium text-gray-600">
-                              {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 truncate">{user.name}</div>
-                            <div className="text-sm text-gray-500 truncate">{user.email}</div>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </>
-                ) : (
-                  <div className="p-4 text-center text-gray-500">
-                    <User className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">No chats available</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Chat Area Panel */}
-            <div className={`${
-              !selectedChatUser 
-                ? 'hidden md:block md:absolute md:left-80 md:top-0 md:right-0 md:bottom-0' 
-                : 'block absolute inset-0 md:relative md:ml-80 md:flex-1'
-            } flex flex-col bg-gray-50 z-20 transition-all duration-300 ease-in-out h-full`}>
-              {selectedChatUser ? (
-                <>
-                  {/* Chat Header - Fixed at top */}
-                  <div className="flex-shrink-0 p-3 border-b bg-white">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        {/* Mobile Back Button - Only show on mobile when chat is open */}
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => setSelectedChatUser(null)}
-                          className="md:hidden"
-                        >
-                          <ArrowLeft className="w-4 h-4" />
-                        </Button>
-                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600">
-                            {selectedChatUser.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{selectedChatUser.name}</h3>
-                          <p className="text-sm text-gray-500">{selectedChatUser.email}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={loadChatMessages}
-                          disabled={isLoadingMessages}
-                          className="text-gray-400 hover:text-gray-600"
-                          title="Refresh Messages"
-                        >
-                          {isLoadingMessages ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <RefreshCw className="w-4 h-4" />
-                          )}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                          <Phone className="w-5 h-5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                          <MoreVertical className="w-5 h-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Messages Area - Scrollable, takes remaining space */}
-                  <div className="flex-1 overflow-y-auto p-4 -webkit-overflow-scrolling-touch min-h-0">
-                    {isLoadingMessages ? (
-                      <div className="text-center py-8">
-                        <div className="text-gray-500">Loading messages...</div>
-                      </div>
-                    ) : chatMessages.length === 0 ? (
-                      <div className="text-center py-8">
-                        <div className="text-gray-500">No messages yet. Start the conversation!</div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {chatMessages.filter(message => message && message.id && message.content).map((message) => {
-                          const isOwnMessage = currentUser?.id.toString() === message.senderId;
-                          const messageTime = new Date(message.timestamp).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          });
-                          
-                          // Check if message is being edited
-                          const isEditing = editingMessage?.id === message.id;
-                          
-                          return (
-                            <div
-                              key={message.id}
-                              className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                            >
-                              <div
-                                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
-                                  isOwnMessage
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-white text-gray-800 shadow-sm'
-                                } ${message.deleted ? 'opacity-60' : ''}`}
-                                onContextMenu={(e) => handleMessageRightClick(e, message)}
-                              >
-                                {isEditing ? (
-                                  <div className="space-y-2">
-                                    <textarea
-                                      value={editingMessage.content}
-                                      onChange={(e) => setEditingMessage(prev => 
-                                        prev ? { ...prev, content: e.target.value } : null
-                                      )}
-                                      className={`w-full p-2 rounded border resize-none ${
-                                        isOwnMessage 
-                                          ? 'bg-green-400 text-white placeholder-green-200' 
-                                          : 'bg-gray-50 text-gray-800'
-                                      }`}
-                                      rows={2}
-                                      autoFocus
-                                    />
-                                    <div className="flex space-x-2">
-                                      <button
-                                        onClick={handleSaveEdit}
-                                        className={`px-3 py-1 rounded text-sm font-medium ${
-                                          isOwnMessage 
-                                            ? 'bg-green-600 text-white hover:bg-green-700' 
-                                            : 'bg-blue-500 text-white hover:bg-blue-600'
-                                        }`}
-                                      >
-                                        Save
-                                      </button>
-                                      <button
-                                        onClick={handleCancelEdit}
-                                        className={`px-3 py-1 rounded text-sm font-medium ${
-                                          isOwnMessage 
-                                            ? 'bg-gray-400 text-white hover:bg-gray-500' 
-                                            : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                                        }`}
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <div className="whitespace-pre-wrap break-words">
-                                      {message.deleted ? (
-                                        <span className="italic text-gray-500">This message was deleted</span>
-                                      ) : (
-                                        message.content
-                                      )}
-                                    </div>
-                                    <div className={`flex items-center justify-between mt-2 text-xs ${
-                                      isOwnMessage ? 'text-green-100' : 'text-gray-500'
-                                    }`}>
-                                      <span>{messageTime}</span>
-                                      {isOwnMessage && !message.deleted && (
-                                        <span className="ml-2">
-                                          {message.edited && '✏️ '}
-                                          {message.status === 'sending' && '⏳'}
-                                          {message.status === 'sent' && '✓'}
-                                          {message.status === 'delivered' && '✓✓'}
-                                          {message.status === 'read' && '✓✓'}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                        {/* Scroll anchor for auto-scrolling to bottom */}
-                        <div ref={chatEndRef} className="h-1" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Input Area - Fixed at absolute bottom */}
-                  <div className="flex-shrink-0 p-4 border-t bg-white mt-auto">
-                    <div className="flex items-center space-x-3">
-                      <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                        <Paperclip className="w-5 h-5" />
-                      </Button>
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
-                          placeholder="Your message"
-                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
-                      </div>
-                      <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                        <Mic className="w-5 h-5" />
-                      </Button>
-                      <Button 
-                        onClick={sendChatMessage} 
-                        disabled={!chatInput.trim()}
-                        className="w-10 h-10 bg-green-500 hover:bg-green-600 text-white rounded-full p-0"
-                      >
-                        <Send className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </>
-                            ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Select a chat to start messaging</h3>
-                    <p className="text-sm text-gray-500">Choose a user from the left panel to begin your conversation</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+    <DealProvider>
+      <div className="space-y-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground mb-2">Deals</h1>
+          <p className="text-muted-foreground">Track your sales opportunities</p>
         </div>
+        
+        <DealFilters />
+        
+        <DealPipeline />
+        
+        <DealForm open={false} onOpenChange={() => {}} />
+      </div>
+    </DealProvider>
+  );
 
-        {/* Context Menu */}
-        {contextMenu?.visible && (
-          <div
-            className="fixed z-[9999] bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px]"
-            style={{
-              left: contextMenu.x,
-              top: contextMenu.y,
-              transform: 'translate(-50%, -100%)'
-            }}
-          >
-            {/* Edit Option - Only show if message is less than 1 minute old */}
-            {isMessageEditable(contextMenu.message) && (
-              <button
-                onClick={() => handleEditMessage(contextMenu.message)}
-                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Edit</span>
-              </button>
-            )}
-            
-            {/* Delete Option - Always visible */}
-            <button
-              onClick={() => handleDeleteMessage(contextMenu.message)}
-              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Delete</span>
-            </button>
-            
-            {/* Forward Option - Always visible */}
-            <button
-              onClick={() => handleForwardMessage(contextMenu.message)}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 transition-colors"
-            >
-              <Forward className="w-4 h-4" />
-              <span>Forward</span>
-            </button>
-          </div>
-        )}
-      </>
-    );
-  };
+
+
+
+
+
+
 
 
 
@@ -1893,24 +1201,24 @@ const Index = () => {
     return (
       <>
         {/* Full-Screen AI Chat Mode */}
-        <div className={`fixed inset-0 bg-white z-50`}>
+        <div className={`fixed inset-0 bg-background z-50`}>
           {/* Chat Header */}
-          <div className={`h-16 bg-white border-b flex items-center justify-between px-6`}>
+          <div className={`h-16 bg-background border-b flex items-center justify-between px-6`}>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" onClick={() => setCurrentView("overview")} className={`hover:bg-gray-100`}>
+              <Button variant="ghost" size="icon" onClick={() => setCurrentView("overview")} className={`hover:bg-muted`}>
                 <ArrowLeft className="w-5 h-5" />
               </Button>
               <div className="flex items-center space-x-3">
                 <Brain className="w-6 h-6 text-purple-600" />
-                <h1 className={`text-xl font-bold text-gray-900`}>AI Chat</h1>
+                <h1 className={`text-xl font-bold text-foreground`}>AI Chat</h1>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="icon" className={`hover:bg-gray-100`}>
-                <Search className="w-5 h-5 text-gray-600" />
+              <Button variant="ghost" size="icon" className={`hover:bg-muted`}>
+                <Search className="w-5 h-5 text-muted-foreground" />
               </Button>
-              <Button variant="ghost" size="icon" className={`hover:bg-gray-100`}>
-                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+              <Button variant="ghost" size="icon" className={`hover:bg-muted`}>
+                <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
               </Button>
             </div>
           </div>
@@ -1918,32 +1226,32 @@ const Index = () => {
           {/* Full Width Chat Layout */}
           <div className="flex h-[calc(100vh-64px)]">
             {/* AI Selection Dropdown */}
-            <div className={`w-80 bg-gray-50 border-gray-200 border-r flex flex-col`}>
+            <div className={`w-80 bg-muted/30 border-border border-r flex flex-col`}>
               {/* AI Selection Header */}
-              <div className={`p-4 border-b bg-white border-gray-200`}>
-                <h3 className="font-semibold text-gray-900">AI Assistant</h3>
-                <p className="text-sm text-gray-500">Select your preferred AI</p>
+              <div className={`p-4 border-b bg-card border-border`}>
+                <h3 className="font-semibold text-card-foreground">AI Assistant</h3>
+                <p className="text-sm text-muted-foreground">Select your preferred AI</p>
               </div>
 
               {/* AI Selection Dropdown */}
               <div className="p-4">
-                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="bg-card rounded-lg border border-border overflow-hidden">
                   {/* Gemini AI - Always Visible */}
                   <div 
-                    className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+                    className={`p-4 border-b border-border cursor-pointer transition-colors ${
                       selectedAI === 'gemini' 
-                        ? 'bg-gradient-to-r from-purple-50 to-purple-100' 
-                        : 'hover:bg-gray-50'
+                        ? 'bg-purple-500/10 border-purple-500/20' 
+                        : 'hover:bg-muted/50'
                     }`}
                     onClick={() => setSelectedAI('gemini')}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
                         <Brain className="w-6 h-6 text-purple-600" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">Gemini AI Assistant</h3>
-                        <p className="text-sm text-gray-500">Powered by Google Gemini</p>
+                        <h3 className="font-medium text-foreground">Gemini AI Assistant</h3>
+                        <p className="text-sm text-purple-500">Powered by Google Gemini</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -1958,18 +1266,18 @@ const Index = () => {
                   <div 
                     className={`p-4 cursor-pointer transition-colors ${
                       selectedAI === 'chatgpt' 
-                        ? 'bg-gradient-to-r from-blue-50 to-blue-100' 
-                        : 'hover:bg-gray-50'
+                        ? 'bg-blue-500/10 border-blue-500/20' 
+                        : 'hover:bg-muted/50'
                     }`}
                     onClick={() => setSelectedAI('chatgpt')}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
                         <Brain className="w-6 h-6 text-blue-600" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">ChatGPT</h3>
-                        <p className="text-sm text-gray-500">Powered by OpenAI</p>
+                        <h3 className="font-medium text-foreground">ChatGPT</h3>
+                        <p className="text-sm text-blue-500">Powered by OpenAI</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -1984,18 +1292,18 @@ const Index = () => {
                   <div 
                     className={`p-4 cursor-pointer transition-colors ${
                       selectedAI === 'cohere' 
-                        ? 'bg-gradient-to-r from-yellow-50 to-yellow-100' 
-                        : 'hover:bg-gray-50'
+                        ? 'bg-yellow-500/10 border-yellow-500/20' 
+                        : 'hover:bg-muted/50'
                     }`}
                     onClick={() => setSelectedAI('cohere')}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
                         <Brain className="w-6 h-6 text-yellow-600" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">Cohere AI</h3>
-                        <p className="text-sm text-gray-500">Powered by Cohere</p>
+                        <h3 className="font-medium text-foreground">Cohere AI</h3>
+                        <p className="text-sm text-yellow-500">Powered by Cohere</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -2010,18 +1318,18 @@ const Index = () => {
                   <div 
                     className={`p-4 cursor-pointer transition-colors ${
                       selectedAI === 'deepai' 
-                        ? 'bg-gradient-to-r from-indigo-50 to-indigo-100' 
-                        : 'hover:bg-gray-50'
+                        ? 'bg-indigo-500/10 border-indigo-500/20' 
+                        : 'hover:bg-muted/50'
                     }`}
                     onClick={() => setSelectedAI('deepai')}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                      <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center">
                         <Brain className="w-6 h-6 text-indigo-600" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">DeepAI</h3>
-                        <p className="text-sm text-gray-500">Powered by DeepAI</p>
+                        <h3 className="font-medium text-foreground">DeepAI</h3>
+                        <p className="text-sm text-indigo-500">Powered by DeepAI</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -2036,9 +1344,9 @@ const Index = () => {
             </div>
 
             {/* Full Width Chat Window */}
-            <div className={`flex-1 bg-white flex flex-col`}>
+            <div className={`flex-1 bg-card flex flex-col`}>
               {/* Chat Header */}
-              <div className={`p-4 border-b bg-white border-gray-200 flex items-center justify-between`}>
+              <div className={`p-4 border-b bg-card border-border flex items-center justify-between`}>
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
                     <AvatarFallback className={`${
@@ -2054,24 +1362,24 @@ const Index = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className={`font-semibold text-gray-900`}>
+                    <h2 className={`font-semibold text-foreground`}>
                       {selectedAI === 'gemini' ? 'Gemini AI Assistant' : selectedAI === 'chatgpt' ? 'ChatGPT Assistant' : selectedAI === 'cohere' ? 'Cohere AI Assistant' : 'DeepAI Assistant'}
                     </h2>
-                    <p className={`text-sm text-gray-500`}>Online</p>
+                    <p className={`text-sm text-muted-foreground`}>Online</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="icon" className={`hover:bg-gray-100`}>
-                    <Search className="w-4 h-4 text-gray-500" />
+                  <Button variant="ghost" size="icon" className={`hover:bg-muted`}>
+                    <Search className="w-4 h-4 text-muted-foreground" />
                   </Button>
-                  <Button variant="ghost" size="icon" className={`hover:bg-gray-100`}>
-                    <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                  <Button variant="ghost" size="icon" className={`hover:bg-muted`}>
+                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </div>
               </div>
 
               {/* Messages Area - Full Width */}
-              <div className={`flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50`}>
+              <div className={`flex-1 overflow-y-auto p-4 space-y-4 bg-muted/30`}>
                 <AIChatDashboard />
               </div>
             </div>
@@ -2156,7 +1464,7 @@ const Index = () => {
                     index === 0
                       ? "bg-yellow-50 border border-yellow-200"
                       : index === 1
-                      ? "bg-gray-50 border border-gray-200"
+                      ? "bg-muted/50 border border-border"
                       : index === 2
                       ? "bg-orange-50 border border-orange-200"
                       : "hover:bg-muted/50"
@@ -2168,7 +1476,7 @@ const Index = () => {
                         index === 0
                           ? "bg-yellow-500 text-white"
                           : index === 1
-                          ? "bg-gray-500 text-white"
+                          ? "bg-muted-foreground text-background"
                           : index === 2
                           ? "bg-orange-500 text-white"
                           : "bg-muted text-muted-foreground"
@@ -2206,215 +1514,83 @@ const Index = () => {
 
 
 
-  const renderSettings = () => {
-    return (
-      <>
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage your account and preferences</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Profile Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-center">
-                <User className="w-5 h-5 mr-2 text-blue-600" />
-                Profile Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xl font-semibold">S</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-medium">Suham</h3>
-                  <p className="text-sm text-muted-foreground">Sales Manager</p>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    Change Photo
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium">Full Name</label>
-                  <Input defaultValue="Suham" className="mt-1" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <Input defaultValue="suham@company.com" className="mt-1" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Role</label>
-                  <Input defaultValue="Sales Manager" className="mt-1" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notification Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-center">
-                <Bell className="w-5 h-5 mr-2 text-green-600" />
-                Notification Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Email Notifications</p>
-                    <p className="text-sm text-muted-foreground">Receive updates via email</p>
-                  </div>
-                  <Button variant="outline" size="sm">Configure</Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Push Notifications</p>
-                    <p className="text-sm text-muted-foreground">Browser push notifications</p>
-                  </div>
-                  <Button variant="outline" size="sm">Configure</Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Chat Alerts</p>
-                    <p className="text-sm text-muted-foreground">New message notifications</p>
-                  </div>
-                  <Button variant="outline" size="sm">Configure</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Security Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-center">
-                <Shield className="w-5 h-5 mr-2 text-red-600" />
-                Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Lock className="w-4 h-4 mr-2" />
-                  Change Password
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Smartphone className="w-4 h-4 mr-2" />
-                  Two-Factor Authentication
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Key className="w-4 h-4 mr-2" />
-                  API Keys
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* System Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-gray-600" />
-                System Preferences
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Theme</p>
-                    <p className="text-sm text-muted-foreground">Light mode</p>
-                  </div>
-                  <Select value="light" onValueChange={() => {}}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">
-                        <div className="flex items-center space-x-2">
-                          <span>🌞</span>
-                          <span>Light</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="dark">
-                        <div className="flex items-center space-x-2">
-                          <span>🌙</span>
-                          <span>Dark</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="system">
-                        <div className="flex items-center space-x-2">
-                          <span>🌓</span>
-                          <span>System</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Language</p>
-                    <p className="text-sm text-muted-foreground">English (US)</p>
-                  </div>
-                  <Button variant="outline" size="sm">Change</Button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Time Zone</p>
-                    <p className="text-sm text-muted-foreground">UTC-5 (Eastern Time)</p>
-                  </div>
-                  <Button variant="outline" size="sm">Change</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </>
-    );
-  };
 
 
+
+
+
+  const renderOrganization = () => (
+    <Organization />
+  );
 
   const renderContent = () => {
     switch (currentView) {
       case "overview":
         return renderOverview();
+      case "organization":
+        return renderOrganization();
       case "leads":
         return renderLeads();
       case "deals":
         return renderDeals();
-      case "tasks":
-        return renderTasks();
-      case "chat":
-        return renderChat();
       case "ai-chat":
         return renderAiChat();
+      case "team-chat":
+        return (
+          <div className="h-[calc(100vh-120px)]">
+            <TeamChat
+              organizationId="all"
+              organizationName="All Organizations"
+            />
+          </div>
+        );
       case "activities":
         return renderActivities();
       case "settings":
-        return renderSettings();
+        return <SettingsComponent />;
       default:
         return renderOverview();
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <CRMSidebar currentView={currentView} onViewChange={setCurrentView} />
-      <div className="flex-1">
-        <TopBar />
-        <main className="p-6">{renderContent()}</main>
+    <div className="responsive-layout bg-background">
+      {/* Sidebar - Hidden on mobile, visible on desktop, hidden in organization view */}
+      {currentView !== 'organization' && (
+        <div className="hidden lg:block">
+          <CRMSidebar currentView={currentView} onViewChange={setCurrentView} />
+        </div>
+      )}
+      
+      <div className="responsive-main min-w-0 overflow-hidden flex-1">
+        {currentView !== 'organization' && (
+          <TopBar 
+            onMobileMenuToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+            onOrganizationClick={() => setCurrentView('organization')}
+          />
+        )}
+        <main className={`responsive-dashboard-main ${currentView === 'organization' ? 'p-0' : 'p-3 lg:p-6'}`}>{renderContent()}</main>
       </div>
+      
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div 
+            className="fixed inset-0 bg-black/50" 
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          <div className="fixed left-0 top-0 h-full w-64 bg-crm-sidebar border-r border-border">
+            <CRMSidebar 
+              currentView={currentView} 
+              onViewChange={(view) => {
+                setCurrentView(view);
+                setIsMobileSidebarOpen(false);
+              }} 
+            />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

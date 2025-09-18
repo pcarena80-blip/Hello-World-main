@@ -1,0 +1,116 @@
+[
+  {
+    "id": "activity_1757922989519",
+    "type": "project",
+    "title": "New Project Created: csadfcsacas",
+    "description": "Project \"csadfcsacas\" has been created - cacacxsaxc",
+    "timestamp": "2025-09-15T07:56:29.519Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "name": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757922989518",
+      "organizationId": "1757918254754",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757920365256",
+    "type": "project",
+    "title": "New Task Created: frdef",
+    "description": "Task \"frdef\" has been created in project \"CRM Dashboard\" - fsdfsdf",
+    "timestamp": "2025-09-15T07:12:45.256Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "name": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "taskId": "task1757920365255",
+      "projectId": "project1757918525597",
+      "organizationId": "1757918254754",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757920342714",
+    "type": "project",
+    "title": "New Task Created:  Dashboard Properties",
+    "description": "Task \" Dashboard Properties\" has been created in project \"CRM Dashboard\" - Divide Dashboard into Different Modules",
+    "timestamp": "2025-09-15T07:12:22.714Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "name": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "taskId": "task1757920342713",
+      "projectId": "project1757918525597",
+      "organizationId": "1757918254754",
+      "action": "created"
+    },
+    "isRead": false
+  },
+  {
+    "id": "activity_1757918525598",
+    "type": "project",
+    "title": "New Project Created: CRM Dashboard",
+    "description": "Project \"CRM Dashboard\" has been created - Make CRM Dashboard using JavaScript",
+    "timestamp": "2025-09-15T06:42:05.598Z",
+    "priority": "medium",
+    "status": "completed",
+    "user": {
+      "id": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "name": {
+        "id": "5",
+        "name": "Hammad",
+        "email": "hammad@gmail.com"
+      },
+      "role": "admin"
+    },
+    "metadata": {
+      "projectId": "project1757918525597",
+      "organizationId": "1757918254754",
+      "action": "created"
+    },
+    "isRead": false
+  }
+]
