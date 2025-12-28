@@ -1,10 +1,48 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
 import { Bell, Receipt, MessageSquare, ClipboardList, FileText, User, ArrowRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../services/api';
 
 export default function HomeScreen() {
   const navigation = useNavigation<any>();
+  const [userName, setUserName] = useState('');
+
+  const [activeNotices, setActiveNotices] = useState<any[]>([]);
+
+  // Reload data whenever screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadUser();
+      loadNotices();
+    }, [])
+  );
+
+  const loadUser = async () => {
+    try {
+      const userData = await AsyncStorage.getItem('user');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        setUserName(parsed.name);
+      }
+      // Optionally fetch fresh profile
+      const profile = await api.profile.get();
+      if (profile?.name) setUserName(profile.name);
+    } catch (e) { console.log(e); }
+  };
+
+  const loadNotices = async () => {
+    try {
+      const data = await api.notices.getAll();
+      // Take top 2 recent notices
+      setActiveNotices(data.slice(0, 2));
+    } catch (e) {
+      console.log('Failed to load notices', e);
+    }
+  };
 
   const quickActions = [
     { icon: Receipt, label: 'Bills', screen: 'Bills', bg: '#FFF4E6', color: '#FF9800' },
@@ -14,10 +52,11 @@ export default function HomeScreen() {
     { icon: User, label: 'Profile', screen: 'Profile', bg: '#F3E5F5', color: '#9C27B0' },
   ];
 
-  const activeNotices = [
-    { id: 1, title: 'Water Supply Maintenance - Block A', date: '2 hours ago' },
-    { id: 2, title: 'Community Meeting This Friday', date: '1 day ago' },
-  ];
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    // Calc time ago if needed, or just date
+    return date.toLocaleDateString();
+  };
 
   return (
     <ScrollView className="h-full bg-gray-50" contentContainerStyle={{ paddingBottom: 20 }}>
@@ -32,7 +71,7 @@ export default function HomeScreen() {
               Welcome Home,
             </Text>
             <Text className="text-white mb-1 text-2xl font-semibold">
-              Ahmed Khan!
+              {userName || 'User'}!
             </Text>
             <Text className="text-white/70 text-xs">
               Check out today's updates
@@ -67,22 +106,26 @@ export default function HomeScreen() {
             </View>
             <View className="px-3 py-1 rounded-full bg-[#027A4C]">
               <Text className="text-white text-xs font-medium">
-                2 Active
+                {activeNotices.length} Active
               </Text>
             </View>
           </View>
 
           <View className="space-y-2 mb-4">
-            {activeNotices.map((notice) => (
-              <View key={notice.id} className="p-3 bg-gray-50 rounded-xl">
-                <Text className="text-gray-900 mb-1 text-sm font-medium">
-                  {notice.title}
-                </Text>
-                <Text className="text-gray-400 text-[11px]">
-                  {notice.date}
-                </Text>
-              </View>
-            ))}
+            {activeNotices.length === 0 ? (
+              <Text className="text-gray-400 text-sm py-2 text-center">No recent notices</Text>
+            ) : (
+              activeNotices.map((notice) => (
+                <View key={notice._id} className="p-3 bg-gray-50 rounded-xl mb-2">
+                  <Text className="text-gray-900 mb-1 text-sm font-medium">
+                    {notice.title}
+                  </Text>
+                  <Text className="text-gray-400 text-[11px]">
+                    {formatDate(notice.createdAt)}
+                  </Text>
+                </View>
+              ))
+            )}
           </View>
 
           <TouchableOpacity
@@ -101,12 +144,13 @@ export default function HomeScreen() {
           <Text className="text-gray-900 mb-4 text-lg font-semibold">
             Quick Actions
           </Text>
-          <View className="flex-row flex-wrap justify-between">
+          <View className="flex-row flex-wrap">
             {quickActions.map((action, index) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => navigation.navigate(action.screen)} // Might incorrectly navigate to unported screens, but fine for now
+                onPress={() => navigation.navigate(action.screen)}
                 className="items-center gap-2 mb-4 w-[30%]"
+                style={{ marginRight: (index + 1) % 3 === 0 ? 0 : '5%' }} // Manual gap for 3 items per row
               >
                 <View
                   className="w-14 h-14 rounded-2xl items-center justify-center"

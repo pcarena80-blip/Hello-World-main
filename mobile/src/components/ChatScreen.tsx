@@ -4,7 +4,7 @@ import { ArrowLeft, Send, Paperclip, Smile, User } from 'lucide-react';
 const messages = [
   { id: 1, sender: 'admin', name: 'Admin', message: 'Welcome to Green Valley Community Chat!', time: '10:00 AM', avatar: 'A' },
   { id: 2, sender: 'user', name: 'Sarah Ali', message: 'Good morning everyone!', time: '10:15 AM', avatar: 'S' },
-  { id: 3, sender: 'user', name: 'Ahmed Khan', message: 'Has anyone seen my car keys? I think I dropped them near the park.', time: '10:20 AM', avatar: 'AK' },
+  { id: 3, sender: 'user', name: 'Zainab Bibi', message: 'Has anyone seen my car keys? I think I dropped them near the park.', time: '10:20 AM', avatar: 'ZB' },
   { id: 4, sender: 'user', name: 'Fatima Hassan', message: 'No, I haven\'t seen them. Will let you know if I find them.', time: '10:25 AM', avatar: 'F' },
   { id: 5, sender: 'user', name: 'Ali Raza', message: 'The community event was great yesterday! Thanks to everyone who participated.', time: '11:00 AM', avatar: 'AR' },
   { id: 6, sender: 'user', name: 'Sarah Ali', message: 'Yes! Looking forward to the next one.', time: '11:05 AM', avatar: 'S' },
@@ -51,13 +51,12 @@ export default function ChatScreen({ onNavigate }: { onNavigate: (screen: string
                 <p className="text-gray-600 mb-1">{msg.name}</p>
               )}
               <div
-                className={`p-4 rounded-3xl ${
-                  msg.sender === 'admin'
+                className={`p-4 rounded-3xl ${msg.sender === 'admin'
                     ? 'bg-gray-200 text-gray-700 text-center'
-                    : msg.name === 'Ahmed Khan'
-                    ? 'bg-[#00c878] text-white rounded-tl-md'
-                    : 'bg-white text-gray-900 rounded-tl-md'
-                }`}
+                    : msg.name === 'Zainab Bibi'
+                      ? 'bg-[#00c878] text-white rounded-tl-md'
+                      : 'bg-white text-gray-900 rounded-tl-md'
+                  }`}
               >
                 <p>{msg.message}</p>
               </div>

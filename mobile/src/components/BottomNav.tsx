@@ -1,4 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Home, ClipboardList, MessageSquare, User, FileText } from 'lucide-react-native';
 import { View, Text } from 'react-native';
 import HomeScreen from './HomeScreen';
@@ -10,6 +11,8 @@ import ProfileScreen from './ProfileScreen';
 const Tab = createBottomTabNavigator();
 
 export default function BottomNav() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -18,8 +21,8 @@ export default function BottomNav() {
           backgroundColor: '#ffffff',
           borderTopWidth: 0,
           elevation: 10,
-          height: 60,
-          paddingBottom: 8,
+          height: 60 + (insets.bottom > 0 ? insets.bottom : 12), // Dynamic height
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 12, // Dynamic padding
           paddingTop: 8,
         },
         tabBarActiveTintColor: '#027A4C',

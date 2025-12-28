@@ -1,19 +1,71 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ArrowLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-
-const contacts: any[] = [];
+import { api } from '../services/api';
 
 export default function PrivateChat() {
   const navigation = useNavigation<any>();
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadCachedInbox();
+    loadInbox();
+    // Refresh inbox every 5 seconds
+    const interval = setInterval(loadInbox, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadCachedInbox = async () => {
+    try {
+      const cachedData = await AsyncStorage.getItem('cachedInbox');
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        if (parsedData && parsedData.length > 0) {
+          setConversations(parsedData);
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.log('Failed to load cached inbox');
+    }
+  };
+
+  const loadInbox = async () => {
+    try {
+      const data = await api.chat.getInbox();
+      setConversations(data);
+      // Update cache
+      await AsyncStorage.setItem('cachedInbox', JSON.stringify(data));
+    } catch (error) {
+      console.log('Failed to load inbox:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-white items-center justify-center">
+        <ActivityIndicator size="large" color="#027A4C" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">
       {/* Content */}
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }}>
-        {contacts.map((contact, index) => (
-          contact ? (
+        {conversations.length === 0 ? (
+          <View className="flex-1 items-center justify-center py-20">
+            <Text className="text-gray-400 text-base">No conversations yet</Text>
+            <Text className="text-gray-400 text-sm mt-2">Start a chat from Community Chat</Text>
+          </View>
+        ) : (
+          conversations.map((contact) => (
             <TouchableOpacity
               key={contact.id}
               onPress={() => navigation.navigate('PrivateChatDetail', { chat: contact })}
@@ -43,8 +95,8 @@ export default function PrivateChat() {
                 {contact.time}
               </Text>
             </TouchableOpacity>
-          ) : <View key={index} className="h-20" />
-        ))}
+          ))
+        )}
       </ScrollView>
     </View>
   );

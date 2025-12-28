@@ -1,9 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useState } from 'react';
+import { api } from '../services/api';
 
-// Fallback images since we don't have the original assets
+// Fallback images
 const easypaisaLogo = 'https://upload.wikimedia.org/wikipedia/commons/archive/f/f3/20160126040854%21Easypaisa_Logo.png';
 const jazzcashLogo = 'https://upload.wikimedia.org/wikipedia/commons/5/58/JazzCash_logo.png';
 
@@ -11,9 +13,9 @@ export default function BillDetails() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { bill } = route.params || {};
+  const [processing, setProcessing] = useState(false);
 
   if (!bill) {
-    // Fallback if no bill data is passed
     return (
       <View className="flex-1 justify-center items-center bg-gray-50">
         <Text className="text-gray-500">No bill details available.</Text>
@@ -24,12 +26,34 @@ export default function BillDetails() {
     )
   }
 
-  const breakdown = [
-    { label: 'Maintenance Fee', amount: 3500 },
-    { label: 'Water Charges', amount: 800 },
-    { label: 'Garbage Collection', amount: 400 },
-    { label: 'Security Charges', amount: 300 },
-  ];
+  const handlePayment = async () => {
+    if (bill.status === 'paid') {
+      Alert.alert('Info', 'This bill is already paid.');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // Simulate payment processing delay
+      // await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Call API to update bill status
+      await api.bills.pay(bill._id, {
+        status: 'paid',
+        paidDate: new Date(),
+        method: 'Online Payment'
+      });
+
+      Alert.alert('Success', 'Bill paid successfully!', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Payment failed. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
 
   return (
     <View className="h-full flex flex-col bg-gray-50">
@@ -64,33 +88,27 @@ export default function BillDetails() {
           >
             <Text
               className="text-[13px] font-medium"
-              style={{ color: bill.status === 'due' ? '#F44336' : '#FF9800' }}
+              style={{ color: bill.status === 'due' ? '#F44336' : bill.status === 'paid' ? '#4CAF50' : '#FF9800' }}
             >
-              {bill.status === 'due' ? `Due: ${bill.dueDate}` : `Due: ${bill.dueDate}`}
+              {bill.status === 'paid' ? 'Paid' : `Due: ${bill.dueDate}`}
             </Text>
           </View>
         </View>
 
-        {/* Breakdown */}
+        {/* Breakdown - Simplified dynamically */}
         <View className="bg-white rounded-2xl p-5 shadow-sm mb-4">
           <Text className="text-gray-900 mb-4 text-base font-semibold">
-            Amount Breakdown
+            Bill Summary
           </Text>
           <View className="space-y-3">
-            {breakdown.map((item, index) => (
-              <View key={index} className="flex-row items-center justify-between py-2">
-                <Text className="text-gray-600 text-sm">
-                  {item.label}
-                </Text>
-                <Text className="text-gray-900 text-sm font-medium">
-                  PKR {item.amount.toLocaleString()}
-                </Text>
-              </View>
-            ))}
+            <View className="flex-row items-center justify-between py-2">
+              <Text className="text-gray-600 text-sm">{bill.type} Bill</Text>
+              <Text className="text-gray-900 text-sm font-medium">PKR {bill.amount.toLocaleString()}</Text>
+            </View>
             <View className="border-t border-gray-200 pt-3 mt-2">
               <View className="flex-row items-center justify-between">
                 <Text className="text-gray-900 text-[15px] font-semibold">
-                  Total
+                  Total Payable
                 </Text>
                 <Text className="text-gray-900 text-[15px] font-semibold">
                   PKR {bill.amount.toLocaleString()}
@@ -100,64 +118,63 @@ export default function BillDetails() {
           </View>
         </View>
 
-        {/* Payment Methods */}
-        <View className="bg-white rounded-2xl p-5 shadow-sm">
-          <Text className="text-gray-900 mb-4 text-base font-semibold">
-            Payment Methods
-          </Text>
-          <View className="space-y-3">
-            <TouchableOpacity className="w-full p-4 border border-gray-200 rounded-xl flex-row items-center gap-4">
-              <View className="w-11 h-11 rounded-xl items-center justify-center overflow-hidden p-2 bg-[#E8F5E9]">
-                <Image
-                  source={{ uri: easypaisaLogo }}
-                  className="w-full h-full"
-                  resizeMode="contain"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-gray-900 text-sm font-medium">
-                  Easypaisa
-                </Text>
-                <Text className="text-gray-500 text-xs">
-                  Mobile wallet
-                </Text>
-              </View>
-            </TouchableOpacity>
+        {/* Payment Methods - Only show if not paid */}
+        {bill.status !== 'paid' && (
+          <View className="bg-white rounded-2xl p-5 shadow-sm">
+            <Text className="text-gray-900 mb-4 text-base font-semibold">
+              Payment Methods
+            </Text>
+            <View className="space-y-3">
+              <TouchableOpacity className="w-full p-4 border border-gray-200 rounded-xl flex-row items-center gap-4">
+                <View className="w-11 h-11 rounded-xl items-center justify-center overflow-hidden p-2 bg-[#E8F5E9]">
+                  <Image
+                    source={{ uri: easypaisaLogo }}
+                    className="w-full h-full"
+                    resizeMode="contain"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-900 text-sm font-medium">Easypaisa</Text>
+                  <Text className="text-gray-500 text-xs">Mobile wallet</Text>
+                </View>
+              </TouchableOpacity>
 
-            <TouchableOpacity className="w-full p-4 border border-gray-200 rounded-xl flex-row items-center gap-4">
-              <View className="w-11 h-11 rounded-xl items-center justify-center overflow-hidden p-2 bg-[#FFEBEE]">
-                <Image
-                  source={{ uri: jazzcashLogo }}
-                  className="w-full h-full"
-                  resizeMode="contain"
-                />
-              </View>
-              <View className="flex-1">
-                <Text className="text-gray-900 text-sm font-medium">
-                  JazzCash
-                </Text>
-                <Text className="text-gray-500 text-xs">
-                  Mobile wallet
-                </Text>
-              </View>
+              <TouchableOpacity className="w-full p-4 border border-gray-200 rounded-xl flex-row items-center gap-4">
+                <View className="w-11 h-11 rounded-xl items-center justify-center overflow-hidden p-2 bg-[#FFEBEE]">
+                  <Image
+                    source={{ uri: jazzcashLogo }}
+                    className="w-full h-full"
+                    resizeMode="contain"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-gray-900 text-sm font-medium">JazzCash</Text>
+                  <Text className="text-gray-500 text-xs">Mobile wallet</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              className={`w-full mt-5 rounded-xl shadow-md ${processing ? 'opacity-70' : ''}`}
+              activeOpacity={0.8}
+              onPress={handlePayment}
+              disabled={processing}
+            >
+              <LinearGradient
+                colors={['#003E2F', '#027A4C']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                className="py-3.5 rounded-xl items-center"
+              >
+                {processing ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-white text-base font-medium">Proceed to Payment</Text>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            className="w-full mt-5 rounded-xl shadow-md"
-            activeOpacity={0.8}
-            onPress={() => alert('Payment Processing...')}
-          >
-            <LinearGradient
-              colors={['#003E2F', '#027A4C']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              className="py-3.5 rounded-xl items-center"
-            >
-              <Text className="text-white text-base font-medium">Proceed to Payment</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+        )}
       </ScrollView>
     </View>
   );

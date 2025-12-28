@@ -51,6 +51,16 @@ export default function EditProfileScreen() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // Validate password if provided
+      if (formData.password) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+          Alert.alert('Error', 'Password must be at least 8 chars, include uppercase, number, and special character');
+          setSaving(false);
+          return;
+        }
+      }
+
       // Send only necessary fields
       await api.profile.update({
         phone: formData.phone,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, Image, Alert, ActivityIndicator } from 'react-native';
 import { ArrowLeft, Image as ImageIcon, ChevronDown } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../services/api';
 
@@ -9,12 +10,13 @@ export default function NewComplaint() {
   const navigation = useNavigation<any>();
   const [formData, setFormData] = useState({
     category: '',
-    title: '',
+    subject: '',
     description: '',
     priority: 'low'
   });
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
 
   const categories = [
     'Maintenance',
@@ -26,18 +28,47 @@ export default function NewComplaint() {
     'Other'
   ];
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0]);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!formData.category || !formData.title || !formData.description) {
+    if (!formData.category || !formData.subject || !formData.description) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     setIsLoading(true);
     try {
-      await api.complaints.create(formData);
+      const data = new FormData();
+      data.append('category', formData.category);
+      data.append('subject', formData.subject);
+      data.append('description', formData.description);
+      data.append('priority', formData.priority);
+
+      if (selectedImage) {
+        // @ts-ignore
+        data.append('image', {
+          uri: selectedImage.uri,
+          type: 'image/jpeg',
+          name: 'complaint.jpg',
+        });
+      }
+
+      await api.complaints.create(data);
       Alert.alert('Success', 'Complaint submitted successfully');
       navigation.goBack();
     } catch (error) {
+      console.error(error);
       Alert.alert('Error', error.message || 'Failed to submit complaint');
     } finally {
       setIsLoading(false);
@@ -106,11 +137,11 @@ export default function NewComplaint() {
 
           <View className="mb-4">
             <Text className="text-gray-700 mb-2 text-sm font-medium">
-              Title
+              Subject
             </Text>
             <TextInput
-              value={formData.title}
-              onChangeText={(text) => setFormData({ ...formData, title: text })}
+              value={formData.subject}
+              onChangeText={(text) => setFormData({ ...formData, subject: text })}
               placeholder="Brief description of the issue"
               className="w-full px-4 py-3.5 border border-gray-200 rounded-xl text-base bg-white"
             />
@@ -135,18 +166,30 @@ export default function NewComplaint() {
             <Text className="text-gray-700 mb-3 text-sm font-medium">
               Attach Photo (Optional)
             </Text>
-            <TouchableOpacity className="w-full p-8 border-2 border-dashed border-gray-300 rounded-xl items-center gap-3">
-              <View className="w-14 h-14 rounded-2xl items-center justify-center bg-[#F1F8F4]">
-                <ImageIcon size={28} color="#027A4C" strokeWidth={1.5} />
-              </View>
-              <View className="items-center">
-                <Text className="text-gray-700 mb-1 text-sm font-medium">
-                  Tap to upload image
-                </Text>
-                <Text className="text-gray-400 text-xs">
-                  JPG, PNG (Max 5MB)
-                </Text>
-              </View>
+            <TouchableOpacity
+              onPress={pickImage}
+              className="w-full p-8 border-2 border-dashed border-gray-300 rounded-xl items-center gap-3"
+            >
+              {selectedImage ? (
+                <View className="w-full items-center">
+                  <Image source={{ uri: selectedImage.uri }} className="w-full h-48 rounded-xl" resizeMode="cover" />
+                  <Text className="text-[#027A4C] mt-2 font-medium">Change Image</Text>
+                </View>
+              ) : (
+                <>
+                  <View className="w-14 h-14 rounded-2xl items-center justify-center bg-[#F1F8F4]">
+                    <ImageIcon size={28} color="#027A4C" strokeWidth={1.5} />
+                  </View>
+                  <View className="items-center">
+                    <Text className="text-gray-700 mb-1 text-sm font-medium">
+                      Tap to upload image
+                    </Text>
+                    <Text className="text-gray-400 text-xs">
+                      JPG, PNG (Max 5MB)
+                    </Text>
+                  </View>
+                </>
+              )}
             </TouchableOpacity>
           </View>
 

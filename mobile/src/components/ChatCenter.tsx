@@ -92,7 +92,7 @@ export default function ChatCenter() {
                   <Text className="text-white text-xl font-semibold">GV</Text>
                 </LinearGradient>
                 <View className="flex-1">
-                  <Text className="text-gray-900 mb-1 text-base font-semibold">Urban East Community</Text>
+                  <Text className="text-gray-900 mb-1 text-base font-semibold">UrbanEase Community</Text>
                   <Text className="text-gray-500 text-xs">256 members • Tap to open chat</Text>
                 </View>
               </TouchableOpacity>

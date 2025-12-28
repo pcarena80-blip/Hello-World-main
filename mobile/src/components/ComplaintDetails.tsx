@@ -3,6 +3,7 @@ import { ArrowLeft, CheckCircle, Clock, Send } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
+import { api } from '../services/api';
 
 export default function ComplaintDetails() {
   const navigation = useNavigation<any>();
@@ -102,7 +103,7 @@ export default function ComplaintDetails() {
           {complaint.image && (
             <View className="rounded-xl overflow-hidden mb-4 border border-gray-100">
               <Image
-                source={{ uri: `https://miah-nonvisible-ariyah.ngrok-free.app${complaint.image}` }}
+                source={{ uri: api.getImageUrl(complaint.image) }}
                 style={{ width: '100%', height: 200 }}
                 resizeMode="cover"
               />
