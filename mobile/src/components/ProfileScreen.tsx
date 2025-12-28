@@ -33,10 +33,27 @@ export default function ProfileScreen() {
 
   const loadProfile = async () => {
     try {
+      console.log('👤 ProfileScreen: Loading profile...');
       const data = await api.profile.get();
+      console.log('👤 ProfileScreen: Profile loaded successfully');
       setProfile(data);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load profile');
+    } catch (error: any) {
+      console.error('👤 ProfileScreen: Error loading profile:', error);
+      Alert.alert(
+        'Profile Load Error',
+        `Could not load profile: ${error.message}\n\nYou can still logout if needed.`,
+        [
+          { text: 'Retry', onPress: () => loadProfile() },
+          { text: 'OK', style: 'cancel' }
+        ]
+      );
+      // Set minimal profile data so UI can still render logout option
+      setProfile({
+        name: 'User',
+        email: 'Error loading profile',
+        phone: 'N/A',
+        address: 'N/A'
+      });
     } finally {
       setLoading(false);
     }
@@ -55,7 +72,17 @@ export default function ProfileScreen() {
   };
 
   if (loading) return <View className="h-full flex items-center justify-center"><ActivityIndicator size="large" color="#027A4C" /></View>;
-  if (!profile) return <View className="h-full flex items-center justify-center"><Text>Failed to load profile</Text></View>;
+  if (!profile) return (
+    <View className="h-full flex items-center justify-center bg-white space-y-4">
+      <Text className="text-red-500 text-lg">Failed to load profile</Text>
+      <TouchableOpacity
+        onPress={onLogout}
+        className="bg-red-500 px-6 py-3 rounded-xl"
+      >
+        <Text className="text-white font-semibold">Log Out</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View className="h-full flex flex-col bg-gray-50">
@@ -75,12 +102,7 @@ export default function ProfileScreen() {
           <Text className="text-white mb-2 text-xl font-semibold">
             {profile.name}
           </Text>
-          <View className="flex-row items-center gap-2 px-3 py-1 rounded-full bg-white/20">
-            <View className="w-2 h-2 rounded-full bg-[#4CAF50]" />
-            <Text className="text-white text-[13px]">
-              Verified Resident
-            </Text>
-          </View>
+
         </View>
       </LinearGradient>
 
@@ -154,7 +176,11 @@ export default function ProfileScreen() {
             <ChevronRight size={20} color="#9CA3AF" strokeWidth={1.5} />
           </TouchableOpacity>
 
-          <TouchableOpacity className="w-full flex-row items-center gap-4 p-4 rounded-xl" activeOpacity={0.7}>
+          <TouchableOpacity
+            className="w-full flex-row items-center gap-4 p-4 rounded-xl"
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('ChangePassword')}
+          >
             <View className="w-11 h-11 rounded-xl items-center justify-center bg-[#F3E5F5]">
               <Lock size={20} color="#9C27B0" strokeWidth={1.5} />
             </View>

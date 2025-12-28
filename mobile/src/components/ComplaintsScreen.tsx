@@ -5,22 +5,39 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../services/api';
 
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 export default function ComplaintsScreen() {
   const navigation = useNavigation<any>();
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('pending');
 
-  useEffect(() => {
-    loadComplaints();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadComplaints();
+    }, [])
+  );
 
   const loadComplaints = async () => {
     try {
+      console.log('🎫 ComplaintsScreen: Loading complaints...');
+      setLoading(true);
       const data = await api.complaints.getAll();
-      setComplaints(data);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load complaints');
+      console.log('🎫 ComplaintsScreen: Received', data?.length, 'complaints');
+      setComplaints(data || []);
+    } catch (error: any) {
+      console.error('🎫 ComplaintsScreen: Error loading complaints:', error);
+      Alert.alert(
+        'Cannot Load Complaints',
+        error.message || 'Please check your internet connection and try again.',
+        [
+          { text: 'Retry', onPress: () => loadComplaints() },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+      setComplaints([]); // Show empty state
     } finally {
       setLoading(false);
     }
@@ -196,7 +213,7 @@ export default function ComplaintsScreen() {
                 {complaint.image && (
                   <View className="mt-2 mb-2 rounded-lg overflow-hidden h-40 bg-gray-100">
                     <Image
-                      source={{ uri: `https://miah-nonvisible-ariyah.ngrok-free.app${complaint.image}` }}
+                      source={{ uri: api.getImageUrl(complaint.image) }}
                       style={{ width: '100%', height: '100%' }}
                       resizeMode="cover"
                     />
